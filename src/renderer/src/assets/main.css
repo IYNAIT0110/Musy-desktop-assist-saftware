@@ -1,0 +1,123 @@
+/* Musy 设计系统 — 暗色暖底 + 红橙发光 + 大圆角 */
+
+:root {
+  /* 背景层级（暖棕暗色系） */
+  --bg-panel: #1a1410;
+  --bg-card: #251a12;
+  --bg-hover: #2e1f14;
+  --bg-input: #251a12;
+
+  /* 强调色（Raycast 红橙发光） */
+  --accent: #ff6b35;
+  --accent-glow: #ff8a3d;
+  --accent-soft: rgba(255, 107, 53, 0.15);
+
+  /* 文字 */
+  --text-primary: #ffe8db;
+  --text-secondary: #b8a8a0;
+  --text-muted: #8a7a70;
+  --text-kbd: #ffd9b8;
+
+  /* 描边 */
+  --border: #33251a;
+  --border-hover: #40291a;
+  --border-accent: #ff6b35;
+
+  /* 圆角 */
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+  --radius-xl: 26px;
+  --radius-full: 999px;
+
+  /* 字体 */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    'Microsoft YaHei', sans-serif;
+  --font-mono: 'SF Mono', 'Cascadia Code', Consolas, monospace;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* 圆角滚动条 */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-hover);
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* 丝滑过渡 */
+.smooth {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 发光选中态 */
+.glow-selected {
+  background: var(--accent-soft);
+  border: 1px solid var(--border-accent);
+  box-shadow: 0 0 16px rgba(255, 107, 53, 0.25);
+}
+
+/* 可爱弹跳动画 */
+@keyframes bounce-in {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.1);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
