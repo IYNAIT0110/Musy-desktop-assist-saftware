@@ -21,6 +21,8 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm run build:win
+      - name: Smoke test installer on clean Windows runner
+        run: node scripts/smoke-win.js
       - name: Generate SHA-256 checksums
         shell: pwsh
         run: |

@@ -1,6 +1,6 @@
 {
   "name": "musy-desktop-assist",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "面向设计工作者的桌面悬窗辅助工具",
   "main": "./out/main/index.js",
   "author": "IYNAIT0110",
