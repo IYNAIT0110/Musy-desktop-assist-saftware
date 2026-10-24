@@ -1,6 +1,6 @@
 {
   "name": "musy-desktop-assist",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "面向设计工作者的桌面悬窗辅助工具",
   "main": "./out/main/index.js",
   "author": "IYNAIT0110",
@@ -13,8 +13,8 @@
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
-    "build:win": "electron-vite build && electron-builder --win",
-    "build:portable": "electron-vite build && electron-builder --win portable"
+    "build:win": "electron-vite build && electron-builder --win --publish never",
+    "build:portable": "electron-vite build && electron-builder --win portable --publish never"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.1",
