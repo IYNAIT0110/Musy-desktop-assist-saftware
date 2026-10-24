@@ -127,7 +127,7 @@ const FIRM_SITES: SeedEntry[] = [
   { title: '安藤忠雄建筑研究所', url: 'https://www.tadao-ando.com/', group: '事务所', desc: '安藤忠雄，大阪，清水混凝土与光影空间' },
   { title: '日建设计 Nikken Sekkei', url: 'https://www.nikken.jp/en/', group: '事务所', desc: '日本规模最大的综合建筑设计事务所' },
   { title: 'WOHA', url: 'https://www.woha.net/', group: '事务所', desc: '新加坡，热带高层与垂直绿化标杆' },
-  { title: 'Vo Trong Nghia Architects', url: 'https://www.votrongnghia.com/', group: '事务所', desc: '越南，竹构与绿色建筑' },
+  { title: 'Vo Trong Nghia Architects', url: 'https://vtnarchitects.net/', group: '事务所', desc: '越南，竹构与绿色建筑' },
   // —— 欧洲 ——
   { title: 'Foster + Partners', url: 'https://www.fosterandpartners.com/', group: '事务所', desc: '诺曼·福斯特，伦敦，高科技与可持续设计' },
   { title: 'Zaha Hadid Architects', url: 'https://www.zaha-hadid.com/', group: '事务所', desc: '扎哈·哈迪德，伦敦，参数化流线型建筑' },
@@ -161,6 +161,13 @@ const FIRM_SITES: SeedEntry[] = [
  * 在 App 挂载时调用；标记已写入后不再重复注入，用户可以自由增删改。
  */
 export function seedFirmSites(): void {
+  // 旧官网已停用；只迁移该条内置收藏，不改动用户自行创建的链接。
+  const links = getLinks()
+  if (links.some((l) => l.id.startsWith('firm-') && l.url === 'https://www.votrongnghia.com/')) {
+    setLinks(links.map((l) => l.id.startsWith('firm-') && l.url === 'https://www.votrongnghia.com/'
+      ? { ...l, url: 'https://vtnarchitects.net/' }
+      : l))
+  }
   const groups = getGroups()
   if (!groups.includes('事务所')) {
     groups.push('事务所')

@@ -15,7 +15,7 @@ import {
 import { loadAIConfig } from './ModelSettings'
 import { PromptsPanel } from './PromptsPanel'
 import { SHORTCUT_BOOKS, shortcutCount, type SoftwareShortcuts } from '../data/shortcuts'
-import { LINK_ICON_OVERRIDES } from '../data/linkIcons'
+import { LINK_ICON_OVERRIDES, LINK_WIDE_ICON_HOSTS } from '../data/linkIcons'
 import logoSketchup from '../assets/logos/sketchup.svg?raw'
 import logoRhinoceros from '../assets/logos/rhinoceros.svg?raw'
 import logoAutocad from '../assets/logos/autocad.svg?raw'
@@ -114,8 +114,8 @@ function LinkTile({
   onHoverLeave: () => void
   onDeleted: () => void
 }): JSX.Element {
-  const { src, letter } = useFavicon(link.url)
-  const dominant = useDominantColor(src)
+  const { src, letter, wideIcon } = useFavicon(link.url)
+  const dominant = useDominantColor(wideIcon ? null : src)
   // 图片加载失败（缓存内容损坏/图标源返回非图片）→ 回落到首字母，避免出现裂图
   const [imgBroken, setImgBroken] = useState(false)
   useEffect(() => setImgBroken(false), [src])
@@ -181,12 +181,12 @@ function LinkTile({
           <img
             src={src}
             alt=""
-            width={32}
+            width={wideIcon ? 70 : 32}
             height={32}
             onError={() => setImgBroken(true)}
             style={{
               borderRadius: Math.max(5, 32 * 0.28),
-              objectFit: 'cover',
+              objectFit: wideIcon ? 'contain' : 'cover',
               background: 'transparent'
             }}
           />
@@ -262,7 +262,7 @@ function LinkTile({
 const faviconMemCache = new Map<string, string | null>()
 
 /** 获取网站 favicon 的本地缓存路径（主进程下载 + 磁盘缓存，返回 file:// 或 null） */
-function useFavicon(url: string): { src: string | null; letter: string } {
+function useFavicon(url: string): { src: string | null; letter: string; wideIcon: boolean } {
   const [src, setSrc] = useState<string | null>(null)
   let host = ''
   try {
@@ -301,7 +301,7 @@ function useFavicon(url: string): { src: string | null; letter: string } {
     }
   }, [url, host])
 
-  return { src, letter }
+  return { src, letter, wideIcon: LINK_WIDE_ICON_HOSTS.has(host.replace(/^www\./, '')) }
 }
 
 // 各模块的空状态设计：可爱文案 + 单行布局，不放重复的吉祥物

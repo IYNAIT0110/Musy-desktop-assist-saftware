@@ -9,7 +9,22 @@
  * 命中覆盖表的站点不再走 favicon 下载（省一次网络请求，也不受站点图标改版影响）。
  */
 import bigLogo from '../assets/firm-icons/big.png'
+import urbanusLogo from '../assets/firm-icons/urbanus.png'
+import zhupeiLogo from '../assets/firm-icons/zhupei.png'
+import vtnLogo from '../assets/firm-icons/vtn.png'
 
 export const LINK_ICON_OVERRIDES: Record<string, string> = {
-  'big.dk': bigLogo
+  'big.dk': bigLogo,
+  // 官网品牌素材：urbanus.com.cn/wp-content/themes/urbanus/ui/images/index_en.png
+  // studiopeizhu.com/template/default/images/logo.png
+  // vtnarchitects.net/images/config/logo_1626670038.png
+  // 这些站点没有稳定的 favicon；第三方图标服务会返回通用的「f」占位图。
+  'urbanus.com.cn': urbanusLogo,
+  'studiopeizhu.com': zhupeiLogo,
+  'votrongnghia.com': vtnLogo,
+  'vtnarchitects.net': vtnLogo
 }
+
+export const LINK_WIDE_ICON_HOSTS = new Set([
+  'urbanus.com.cn', 'studiopeizhu.com', 'votrongnghia.com', 'vtnarchitects.net'
+])
