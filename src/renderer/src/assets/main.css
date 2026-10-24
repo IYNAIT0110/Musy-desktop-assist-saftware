@@ -1,27 +1,30 @@
-/* Musy 设计系统 — 暗色暖底 + 红橙发光 + 大圆角 */
+/* Musy 设计系统 — 近黑冷调 + 克制强调色（参考 Raycast / Linear） */
 
 :root {
-  /* 背景层级（暖棕暗色系） */
-  --bg-panel: #1a1410;
-  --bg-card: #251a12;
-  --bg-hover: #2e1f14;
-  --bg-input: #251a12;
+  /* 背景层级（近黑冷调，非纯黑，带极淡蓝偏移） */
+  --bg-panel: #0d0d0f;
+  --bg-card: #151518;
+  --bg-hover: #1f1f23;
+  --bg-input: #151518;
 
-  /* 强调色（Raycast 红橙发光） */
-  --accent: #ff6b35;
-  --accent-glow: #ff8a3d;
-  --accent-soft: rgba(255, 107, 53, 0.15);
+  /* 强调色：低饱和暖橙（Raycast 珊瑚红降饱和版），仅作点缀，不铺满按钮 */
+  --accent: #f5f5f7;
+  --accent-glow: #ffffff;
+  --accent-soft: rgba(255, 255, 255, 0.1);
+  /* 品牌点缀色（选中态 / 图标高亮 / 焦点环） */
+  --accent-tint: #e5665a;
+  --accent-tint-soft: rgba(229, 102, 90, 0.16);
 
   /* 文字 */
-  --text-primary: #ffe8db;
-  --text-secondary: #b8a8a0;
-  --text-muted: #8a7a70;
-  --text-kbd: #ffd9b8;
+  --text-primary: #f5f5f7;
+  --text-secondary: #9a9aa2;
+  --text-muted: #6e6e76;
+  --text-kbd: #cfcfd6;
 
-  /* 描边 */
-  --border: #33251a;
-  --border-hover: #40291a;
-  --border-accent: #ff6b35;
+  /* 描边（发丝边框，靠边框区分层次而非阴影） */
+  --border: #26262b;
+  --border-hover: #35353c;
+  --border-accent: #f5f5f7;
 
   /* 圆角 */
   --radius-sm: 12px;
@@ -34,6 +37,19 @@
   --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
     'Microsoft YaHei', sans-serif;
   --font-mono: 'SF Mono', 'Cascadia Code', Consolas, monospace;
+
+  /* === 动效设计令牌（遵循 Emil Kowalski 动画哲学） === */
+  /* 缓动曲线：内置 ease 太弱，用强曲线 */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1); /* 入场：快速出现、柔和减速 */
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1); /* 屏幕内移动/形变 */
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1); /* iOS 抽屉式展开 */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1); /* 弹性回弹（仅装饰/惊喜） */
+
+  /* 时长层级 */
+  --dur-instant: 120ms; /* 按压反馈、hover */
+  --dur-fast: 180ms; /* 下拉、选中 */
+  --dur-normal: 240ms; /* 面板、抽屉、形态切换 */
+  --dur-slow: 320ms; /* 模态、大面板 */
 }
 
 * {
@@ -58,6 +74,24 @@ body,
 /* 圆角滚动条 */
 ::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
+}
+
+/* 子提示词缩略图条：更细的横向滚动条 */
+.child-strip {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-hover) transparent;
+  overscroll-behavior-x: contain;
+}
+.child-strip::-webkit-scrollbar {
+  height: 5px;
+}
+.child-strip::-webkit-scrollbar-thumb {
+  background: var(--border-hover);
+  border-radius: var(--radius-full);
+}
+.child-strip::-webkit-scrollbar-track {
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
   background: var(--border-hover);
@@ -67,26 +101,32 @@ body,
   background: transparent;
 }
 
-/* 丝滑过渡 */
+/* 丝滑过渡（只动画 transform + opacity，避免重排） */
 .smooth {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    opacity var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
 }
 
 /* 发光选中态 */
 .glow-selected {
   background: var(--accent-soft);
   border: 1px solid var(--border-accent);
-  box-shadow: 0 0 16px rgba(255, 107, 53, 0.25);
+  box-shadow: 0 0 16px rgba(255, 255, 255, 0.2);
 }
 
-/* 可爱弹跳动画 */
+/* 可爱弹跳动画（装饰性惊喜，仅低频场景） */
 @keyframes bounce-in {
   0% {
-    transform: scale(0.8);
+    transform: scale(0.92);
     opacity: 0;
   }
   60% {
-    transform: scale(1.05);
+    transform: scale(1.02);
   }
   100% {
     transform: scale(1);
@@ -115,9 +155,342 @@ body,
 }
 
 .animate-bounce-in {
-  animation: bounce-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: bounce-in 0.34s var(--ease-spring);
+}
+
+/* 内容切换：极轻淡入（高频操作，避免弹跳拖沓） */
+.animate-fade-in {
+  animation: fade-in var(--dur-fast) var(--ease-out) both;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .animate-float {
   animation: float 3s ease-in-out infinite;
+}
+
+/* === 吉祥物动效 === */
+
+/* 呼吸式缩放（身体整体轻微起伏，像在呼吸） */
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.04);
+  }
+}
+
+/* 左右轻微摇摆（有生命力的晃动） */
+@keyframes sway {
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+/* 眨眼 */
+@keyframes mascot-blink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  94%,
+  96% {
+    transform: scaleY(0.1);
+  }
+}
+
+/* 光环脉动（科技感辉光呼吸） */
+@keyframes halo-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 0.9;
+  }
+}
+
+/* 粒子漂浮 */
+@keyframes particle-rise {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(-14px) scale(0.4);
+    opacity: 0;
+  }
+}
+
+/* 耳朵抖动（兴奋时） */
+@keyframes ear-wiggle {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-12deg);
+  }
+  75% {
+    transform: rotate(12deg);
+  }
+}
+
+.mascot-breathe {
+  animation: breathe 2.8s ease-in-out infinite;
+}
+
+.mascot-sway {
+  animation: sway 4.5s ease-in-out infinite;
+}
+
+.mascot-halo {
+  animation: halo-pulse 2.4s ease-in-out infinite;
+}
+
+.mascot-particle {
+  animation: particle-rise 2.6s ease-in-out infinite;
+}
+
+.mascot-ear {
+  transform-origin: bottom center;
+  animation: ear-wiggle 0.6s ease-in-out infinite;
+}
+
+/* === 无障碍：减少动效（保留透明度/颜色，去掉位移与缩放类动效） === */
+@media (prefers-reduced-motion: reduce) {
+  .animate-bounce-in,
+  .animate-float,
+  .animate-fade-in,
+  .mascot-breathe,
+  .mascot-sway,
+  .mascot-halo,
+  .mascot-particle,
+  .mascot-ear {
+    animation: none !important;
+  }
+  .titlebar-panel,
+  .float-panel {
+    transition-duration: 0.01ms !important;
+  }
+  .smooth {
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* === 悬浮条形态切换动效（transition + @starting-style，可打断） === */
+
+/* 整体玻璃背景层：随窗口宽度自然伸缩，只做淡入淡出 */
+.glass-bar {
+  opacity: 1;
+  transition: opacity var(--dur-normal) var(--ease-out);
+}
+
+@starting-style {
+  .glass-bar {
+    opacity: 0;
+  }
+}
+
+.glass-bar.exiting {
+  opacity: 0;
+}
+
+/* 展开胶囊（布局层）：入场淡入；退场淡出。
+   用 transition 而非 keyframes，快速连点时可从当前状态平滑 retarget。 */
+.capsule-panel {
+  opacity: 1;
+  transform: translateX(0);
+  transition:
+    opacity var(--dur-normal) var(--ease-out),
+    transform var(--dur-normal) var(--ease-out);
+}
+
+@starting-style {
+  .capsule-panel {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+}
+
+/* 退场态：胶囊淡出 + 向左收缩回球体 */
+.capsule-panel.exiting {
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+/* L3 标题栏：随窗口加宽淡入，退场淡出（不做位移，避免与窗口收缩叠加跳动） */
+.titlebar-panel {
+  opacity: 1;
+  transition: opacity var(--dur-normal) var(--ease-out);
+}
+
+@starting-style {
+  .titlebar-panel {
+    opacity: 0;
+  }
+}
+
+.titlebar-panel.exiting {
+  opacity: 0;
+}
+
+/* L3 功能面板：向下展开（淡入 + 轻微上移入场），退场淡出下移 */
+.float-panel {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity var(--dur-slow) var(--ease-drawer),
+    transform var(--dur-slow) var(--ease-drawer);
+}
+
+@starting-style {
+  .float-panel {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.99);
+  }
+}
+
+.float-panel.exiting {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.99);
+}
+
+/* 功能图标：入场从右侧滑入（级联 delay 由内联样式控制）。
+   常态 transform:none，避免与 .pressable 的 :active 缩放冲突 */
+.icon-item {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+@starting-style {
+  .icon-item {
+    opacity: 0;
+    transform: translateX(6px);
+  }
+}
+
+/* === 可按压元素：统一按压反馈（hover 门控 + :active 缩小） === */
+
+/* 去掉点击后的默认 focus 描边（白色 outline 与发光选中态叠加很突兀） */
+button:focus,
+button:focus-visible {
+  outline: none;
+}
+
+/* hover 缩放：仅精确指针设备（鼠标），触屏 tap 不误触 */
+@media (hover: hover) and (pointer: fine) {
+  .pressable:hover {
+    transform: scale(1.06);
+  }
+  .pressable:active {
+    transform: scale(0.97);
+  }
+}
+
+/* 悬浮球：hover 轻放大、按压缩小反馈（尊重 reduced-motion） */
+.mascot-ball {
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .mascot-ball:active {
+    transform: scale(0.97);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mascot-ball,
+  .pressable {
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 链接卡片：hover 高亮 + 删除按钮浮现 */
+.link-tile:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-hover);
+}
+.link-tile:hover .link-del {
+  opacity: 1 !important;
+}
+
+/* 提示词卡片：悬停时图片上端浮现复制/删除按钮 */
+.prompt-card:hover .prompt-card-actions {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+  pointer-events: auto !important;
+}
+
+/* 提示词卡片：悬停时图片下端浮现提示词片段 */
+.prompt-card:hover .prompt-card-text {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+  pointer-events: auto !important;
+}
+
+/* 悬停时标签隐去，避免与提示词片段打架 */
+.prompt-card .prompt-card-tags {
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+.prompt-card:hover .prompt-card-tags {
+  opacity: 0;
+}
+
+/* L4 提示词工作区：悬停图片放大预览浮层（暗化背景 + 缩放入场动画） */
+.img-zoom-overlay {
+  background: rgba(0, 0, 0, 0.55);
+  animation: img-zoom-fade var(--dur-fast, 150ms) var(--ease-out, ease-out);
+}
+.img-zoom-overlay img {
+  animation: img-zoom-pop 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes img-zoom-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes img-zoom-pop {
+  from { opacity: 0; transform: scale(0.86); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* 快捷键软件卡片：官方品牌 SVG 填充为白色（黑白风格） */
+.sw-logo svg {
+  width: 100%;
+  height: 100%;
+  fill: #ffffff;
+}
+
+/* 分组行：hover 时数字隐藏、编辑/删除按钮浮现（覆盖在数字原位） */
+.group-row:hover .group-actions {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+.group-row:hover .group-count {
+  opacity: 0 !important;
+}
+.group-count {
+  transition: opacity var(--dur-fast) var(--ease-out);
 }

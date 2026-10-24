@@ -32,9 +32,9 @@ export function createMainWindow(): BrowserWindow {
     mainWindow?.show()
   })
 
-  // 外部链接用系统浏览器打开
-  mainWindow.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url)
+  // 外部链接用系统浏览器打开（同样只放行 http/https，拦住 javascript: / file: 等协议）
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (/^https?:\/\//i.test(url)) shell.openExternal(url)
     return { action: 'deny' }
   })
 

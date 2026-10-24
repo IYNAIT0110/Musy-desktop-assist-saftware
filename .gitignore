@@ -4,8 +4,20 @@ node_modules/
 # Build output
 dist/
 out/
-build/
 release/
+release-test/
+release-test2/
+# electron-builder 资源目录：只保留应用图标（构建必需），其余忽略
+build/*
+!build/icon.ico
+!build/icon.png
+
+# TypeScript 增量编译缓存
+*.tsbuildinfo
+
+# 本地数据 / 备份（提示词与图片是个人数据，绝不入库）
+musy-data.json
+*.musy
 
 # Electron
 *.log

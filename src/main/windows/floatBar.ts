@@ -14,15 +14,18 @@ export function createFloatBarWindow(): BrowserWindow {
   }
 
   const { workArea } = screen.getPrimaryDisplay()
-  // 悬浮条尺寸（竖向窄条）
+  // 悬浮条尺寸：初始为最小球 64×64
+  // 定位在屏幕左侧垂直居中偏上，给向右（760px）与向下（560px）的展开预留空间
   const barWidth = 64
-  const barHeight = 280
+  const barHeight = 64
+  const barX = workArea.x + 16
+  const barY = workArea.y + Math.round((workArea.height - barHeight) / 2) - 80
 
   floatBarWindow = new BrowserWindow({
     width: barWidth,
     height: barHeight,
-    x: workArea.x + workArea.width - barWidth - 16,
-    y: Math.round(workArea.y + (workArea.height - barHeight) / 2),
+    x: barX,
+    y: barY,
     show: false,
     frame: false,
     transparent: true,
@@ -47,8 +50,15 @@ export function createFloatBarWindow(): BrowserWindow {
     floatBarWindow?.show()
   })
 
-  floatBarWindow.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url)
+  // 从任务栏恢复（用户点击任务栏图标）：重新置顶并隐藏任务栏图标
+  floatBarWindow.on('restore', () => {
+    floatBarWindow?.setAlwaysOnTop(true, 'screen-saver')
+    floatBarWindow?.setSkipTaskbar(true)
+  })
+
+  // 只允许 http/https 走系统浏览器：拦住 javascript: / file: / data: 等危险协议
+  floatBarWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (/^https?:\/\//i.test(url)) shell.openExternal(url)
     return { action: 'deny' }
   })
 
