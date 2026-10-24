@@ -259,7 +259,7 @@ function LinkTile({
 }
 
 // favicon 本地缓存路径的内存缓存：同一 host 只 IPC 一次
-const faviconMemCache = new Map<string, string | null>()
+const faviconMemCache = new Map<string, string>()
 
 /** 获取网站 favicon 的本地缓存路径（主进程下载 + 磁盘缓存，返回 file:// 或 null） */
 function useFavicon(url: string): { src: string | null; letter: string; wideIcon: boolean } {
@@ -289,12 +289,12 @@ function useFavicon(url: string): { src: string | null; letter: string; wideIcon
     window.api
       .getFavicon(url)
       .then((p) => {
-        faviconMemCache.set(host, p)
+        if (p) faviconMemCache.set(host, p)
         if (!dead) setSrc(p)
       })
       .catch(() => {
         // 下载/读取失败不抛未捕获异常：回落首字母头像即可
-        faviconMemCache.set(host, null)
+        if (!dead) setSrc(null)
       })
     return () => {
       dead = true

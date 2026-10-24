@@ -12,6 +12,7 @@ import bigLogo from '../assets/firm-icons/big.png'
 import urbanusLogo from '../assets/firm-icons/urbanus.png'
 import zhupeiLogo from '../assets/firm-icons/zhupei.png'
 import vtnLogo from '../assets/firm-icons/vtn.png'
+import sanaaLogo from '../assets/firm-icons/sanaa.svg'
 
 export const LINK_ICON_OVERRIDES: Record<string, string> = {
   'big.dk': bigLogo,
@@ -22,9 +23,10 @@ export const LINK_ICON_OVERRIDES: Record<string, string> = {
   'urbanus.com.cn': urbanusLogo,
   'studiopeizhu.com': zhupeiLogo,
   'votrongnghia.com': vtnLogo,
-  'vtnarchitects.net': vtnLogo
+  'vtnarchitects.net': vtnLogo,
+  'sanaa.co.jp': sanaaLogo
 }
 
 export const LINK_WIDE_ICON_HOSTS = new Set([
-  'urbanus.com.cn', 'studiopeizhu.com', 'votrongnghia.com', 'vtnarchitects.net'
+  'urbanus.com.cn', 'studiopeizhu.com', 'votrongnghia.com', 'vtnarchitects.net', 'sanaa.co.jp'
 ])

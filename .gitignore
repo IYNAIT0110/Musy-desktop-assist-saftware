@@ -5,6 +5,7 @@ node_modules/
 dist/
 out/
 release/
+release-*/
 release-test/
 release-test2/
 # electron-builder 资源目录：只保留应用图标（构建必需），其余忽略

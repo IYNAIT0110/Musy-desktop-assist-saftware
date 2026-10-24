@@ -126,9 +126,19 @@ function bootstrap(): void {
     return job
   })
 
-  // === favicon 下载 + 本地缓存（解决 favicon.im 每次 1.6~3.6s 慢加载） ===
-  const faviconDir = join(app.getPath('userData'), 'favicons')
+  // === 从网站自身获取 favicon，并使用独立缓存版本 ===
+  const faviconDir = join(app.getPath('userData'), 'favicons-v2')
+  const legacyFaviconDir = join(app.getPath('userData'), 'favicons')
+  const genericFaviconHash = 'f594faa8f108ab9610dac7541200eadcaf558bd8944dc57e28f411a9a060ea9e'
   const faviconInFlight = new Map<string, Promise<string | null>>()
+
+  const isGenericFavicon = (buf: Buffer): boolean => {
+    if (createHash('sha256').update(buf).digest('hex') === genericFaviconHash) return true
+    const svg = buf.subarray(0, 1024).toString('utf8')
+    return /<svg\b/i.test(svg) &&
+      /<circle\b[^>]*fill=["']#808080["']/i.test(svg) &&
+      /<text\b[^>]*>\s*f\s*<\/text>/i.test(svg)
+  }
 
   /**
    * 按魔数判断字节流是否真的是图片。
@@ -167,19 +177,40 @@ function bootstrap(): void {
     }
   }
 
+  // Resolve icon links declared in the page, including relative URLs and unquoted attributes.
+  const iconUrlsFromHtml = (html: string, pageUrl: string): string[] => {
+    const urls: string[] = []
+    for (const tag of html.match(/<link\b[^>]*>/gi) ?? []) {
+      const attrs = new Map<string, string>()
+      for (const match of tag.matchAll(/([\w-]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/g)) {
+        attrs.set(match[1].toLowerCase(), match[2] ?? match[3] ?? match[4])
+      }
+      if (!/(?:^|\s)(?:icon|apple-touch-icon|apple-touch-icon-precomposed)(?:\s|$)/i.test(attrs.get('rel') ?? '')) continue
+      const href = attrs.get('href')
+      if (!href) continue
+      try {
+        const resolved = new URL(href.replace(/&amp;/g, '&'), pageUrl)
+        if (resolved.protocol === 'http:' || resolved.protocol === 'https:') urls.push(resolved.href)
+      } catch { /* Ignore invalid icon URLs. */ }
+    }
+    return urls
+  }
+
   ipcMain.handle('favicon:get', async (_e, url: string) => {
     if (!url) return null
     let host = ''
     let origin = ''
     try {
       const u = new URL(url)
-      host = u.hostname
+      if (u.protocol !== 'http:' && u.protocol !== 'https:') return null
+      host = u.hostname.toLowerCase()
       origin = u.origin
     } catch {
       return null
     }
     // 缓存文件：host 的 md5 作为文件名，避免非法字符
     const file = join(faviconDir, `${createHash('md5').update(host).digest('hex')}.ico`)
+    const legacyFile = join(legacyFaviconDir, `${createHash('md5').update(host).digest('hex')}.ico`)
 
     if (existsSync(file)) {
       const uri = await toDataUri(file)
@@ -191,6 +222,19 @@ function bootstrap(): void {
         /* ignore */
       }
     }
+    // Keep genuine icons already downloaded by older versions, but discard the
+    // generic "f" SVG that prompted this cache migration.
+    if (existsSync(legacyFile)) {
+      try {
+        const old = await readFile(legacyFile)
+        const mime = sniffImage(old)
+        if (mime && !isGenericFavicon(old)) {
+          await mkdir(faviconDir, { recursive: true })
+          await writeFile(file, old)
+          return `data:${mime};base64,${old.toString('base64')}`
+        }
+      } catch { /* Retry from the website. */ }
+    }
     // 去重：同一 host 并发请求只下载一次
     if (faviconInFlight.has(host)) {
       return faviconInFlight.get(host)
@@ -198,22 +242,34 @@ function bootstrap(): void {
     const p = (async (): Promise<string | null> => {
       try {
         // 用系统 fetch（Electron 31 内置，Node 18+），走主进程网络栈，避免渲染进程 CSP/代理差异
-        // 源顺序按国内网络实测：favicon.im 最稳；Google s2 在墙内常超时故排后；
-        // 最后才回落到站点自身路径（用 origin 保留 http 站点的协议）
-        const sources = [
-          `https://favicon.im/${host}?larger=true`,
-          `https://www.google.com/s2/favicons?domain=${host}&sz=128`,
+        // Prefer the page's own icon declaration, then the site's standard path.
+        // The aggregator is a fallback for sites that block direct requests.
+        const sources: string[] = []
+        try {
+          const page = await fetch(origin, { signal: AbortSignal.timeout(4000) })
+          if (page.ok && Number(page.headers.get('content-length') ?? 0) < 512_000) {
+            sources.push(...iconUrlsFromHtml((await page.text()).slice(0, 512_000), page.url))
+          }
+        } catch { /* Try conventional paths when the homepage is unavailable. */ }
+        sources.push(
           `${origin}/favicon.ico`,
+          `https://favicon.im/${host}?larger=true`,
+          `${origin}/favicon.png`,
           `${origin}/apple-touch-icon.png`,
-          `https://${host}/favicon.ico`
-        ]
-        for (const src of sources) {
+          `${origin}/apple-touch-icon-precomposed.png`
+        )
+        // The aggregator recovers icons when a site blocks Electron requests;
+        // reject its known generic "f" placeholder before caching.
+        for (const src of new Set(sources)) {
           try {
             const res = await fetch(src, { signal: AbortSignal.timeout(4000) })
             if (!res.ok) continue
+            if (Number(res.headers.get('content-length') ?? 0) > 1_000_000) continue
             const buf = Buffer.from(await res.arrayBuffer())
+            if (buf.length > 1_000_000) continue
             const mime = sniffImage(buf)
             if (!mime) continue // 非图片（如 SPA 回退返回的 HTML）→ 换下一个源
+            if (src.startsWith('https://favicon.im/') && isGenericFavicon(buf)) continue
             await mkdir(faviconDir, { recursive: true })
             await writeFile(file, buf)
             return `data:${mime};base64,${buf.toString('base64')}`
