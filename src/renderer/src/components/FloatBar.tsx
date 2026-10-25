@@ -1,55 +1,27 @@
+import { floatInsets } from '../../../shared/floatLayout'
+import { InteractiveButton } from './HoverFeedback'
 import { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react'
-import { Mascot, ALL_STATES, type GrokState } from './Mascot'
+import { Mascot } from './Mascot'
 import { MainWindow } from './MainWindow'
 import { Settings } from './Settings'
 import { PromptWorkspace } from './PromptsPanel'
-import type { PromptItem } from '../store'
-import { t, useLang } from '../i18n'
-
-// 悬浮条图标（简洁 SVG）
-const icons = {
-  links: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-    </svg>
-  ),
-  prompts: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="3" width="18" height="18" rx="4" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
-  ),
-  shortcuts: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="6" width="20" height="12" rx="4" />
-      <line x1="6" y1="10" x2="6" y2="14" />
-      <line x1="10" y1="10" x2="10" y2="14" />
-      <line x1="14" y1="10" x2="14" y2="14" />
-      <line x1="18" y1="10" x2="18" y2="14" />
-    </svg>
-  ),
-  polish: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 20h9" />
-      <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
-    </svg>
-  ),
-  models: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-      <path d="M3.27 6.96 12 12.01l8.73-5.05" />
-      <path d="M12 22.08V12" />
-    </svg>
-  )
-}
+import { NavigationIcon } from './NavigationIcon'
+import GooeyNav from './GooeyNav'
+import { GOOEY_NAV_SETTINGS } from '../gooeyNavSettings'
+import './musy-gooey-nav.css'
+import { WindowControlIcon } from './WindowControlIcon'
+import { LinkPromptActions } from './LinkPromptActions'
+import { BallCollector } from './BallCollector'
+import { addLink, getLinks, type PromptItem } from '../store'
+import { isClipboardPromptEnabled } from '../clipboardPrompt'
+import { t, tx, useLang } from '../i18n'
 
 const items = [
-  { key: 'links', labelKey: 'nav.links', icon: icons.links },
-  { key: 'prompts', labelKey: 'nav.prompts', icon: icons.prompts },
-  { key: 'shortcuts', labelKey: 'nav.shortcuts', icon: icons.shortcuts },
-  { key: 'polish', labelKey: 'nav.polish', icon: icons.polish },
-  { key: 'models', labelKey: 'nav.models', icon: icons.models }
+  { key: 'links', labelKey: 'nav.links', icon: <NavigationIcon name="links" /> },
+  { key: 'prompts', labelKey: 'nav.prompts', icon: <NavigationIcon name="prompts" /> },
+  { key: 'shortcuts', labelKey: 'nav.shortcuts', icon: <NavigationIcon name="shortcuts" /> },
+  { key: 'polish', labelKey: 'nav.polish', icon: <NavigationIcon name="polish" /> },
+  { key: 'models', labelKey: 'nav.models', icon: <NavigationIcon name="models" /> }
 ]
 /**
  * 悬浮条：三级形态。
@@ -64,6 +36,16 @@ export function FloatBar(): JSX.Element {
   useLang()
   // 展开状态：L1=false, L2=true
   const [expanded, setExpanded] = useState(false)
+  const [animationInsets, setAnimationInsets] = useState(() => floatInsets(1))
+  useEffect(() => {
+    const down = (): void => window.api.setFloatPointerHeld(true)
+    const up = (): void => window.api.setFloatPointerHeld(false)
+    window.addEventListener('pointerdown', down, true)
+    window.addEventListener('pointerup', up, true)
+    window.addEventListener('pointercancel', up, true)
+    window.addEventListener('blur', up)
+    return () => { window.removeEventListener('pointerdown', down, true); window.removeEventListener('pointerup', up, true); window.removeEventListener('pointercancel', up, true); window.removeEventListener('blur', up); up() }
+  }, [])
   // L3 完整面板（向下展开的功能界面）
   const [panelOpen, setPanelOpen] = useState(false)
   const [panelMounted, setPanelMounted] = useState(false)
@@ -74,32 +56,99 @@ export function FloatBar(): JSX.Element {
   const [dragging, setDragging] = useState(false)
   // 统一设置面板
   const [showSettings, setShowSettings] = useState(false)
-  // 最小化悬浮球时的随机情绪（在 39 种状态间轮换）
-  const [mood, setMood] = useState<GrokState>('idle')
   // L4 提示词工作区：当前打开的提示词（母或子）；null 表示未打开
   const [promptItem, setPromptItem] = useState<PromptItem | null>(null)
+  const [linkPrompt, setLinkPrompt] = useState<{ url: string; side: 'left' | 'right'; message?: string } | null>(null)
 
   const level = promptItem ? 4 : panelOpen ? 3 : expanded ? 2 : 1
+  const levelRef = useRef(level)
+  const promptRef = useRef(linkPrompt)
+  const lastPromptAtRef = useRef(0)
+  const pendingUrlRef = useRef<string | null>(null)
+  const offerInFlightRef = useRef(false)
+  const collectingRef = useRef(false)
+  levelRef.current = level
+  promptRef.current = linkPrompt
 
-  // 最小化时：定时随机切换情绪；展开时固定为 idle
-  useEffect(() => {
-    if (level >= 2) {
-      setMood('idle')
+  const dismissLinkPrompt = (): void => {
+    promptRef.current = null
+    setLinkPrompt(null)
+    void window.api.hideLinkBubble()
+  }
+
+  const offerLink = (url: string): void => {
+    if (!isClipboardPromptEnabled()) return
+    if (levelRef.current !== 1 || promptRef.current || offerInFlightRef.current || collectingRef.current) {
+      pendingUrlRef.current = url
       return
     }
-    const pickRandom = (): void => {
-      const next = ALL_STATES[Math.floor(Math.random() * ALL_STATES.length)]
-      setMood(next)
+    if (Date.now() - lastPromptAtRef.current < 30000) return
+    if (getLinks().some((link) => link.url === url)) return
+    offerInFlightRef.current = true
+    void window.api.showLinkBubble().then((side) => {
+      if (!side) return
+      if (levelRef.current !== 1 || !isClipboardPromptEnabled()) {
+        void window.api.hideLinkBubble()
+        pendingUrlRef.current = url
+        return
+      }
+      lastPromptAtRef.current = Date.now()
+      promptRef.current = { url, side }
+      setLinkPrompt({ url, side })
+    }).finally(() => { offerInFlightRef.current = false })
+  }
+
+  useEffect(() => {
+    let mounted = true
+    const unsubscribe = window.api.onClipboardUrl(offerLink)
+    void window.api.setClipboardLinkWatch(isClipboardPromptEnabled()).then((url) => {
+      if (mounted && url) offerLink(url)
+    })
+    const onSettingChange = (): void => {
+      const enabled = isClipboardPromptEnabled()
+      void window.api.setClipboardLinkWatch(enabled).then((url) => {
+        if (enabled && url) offerLink(url)
+      })
+      if (!enabled) {
+        pendingUrlRef.current = null
+        dismissLinkPrompt()
+      }
     }
-    // 首次立即随机一个，之后每隔 2~4 秒切换一次
-    pickRandom()
-    const timer = setInterval(pickRandom, 2000 + Math.random() * 2000)
-    return () => clearInterval(timer)
+    window.addEventListener('musy:clipboard-prompt-setting', onSettingChange)
+    return () => {
+      mounted = false
+      unsubscribe()
+      window.removeEventListener('musy:clipboard-prompt-setting', onSettingChange)
+      void window.api.setClipboardLinkWatch(false)
+      void window.api.hideLinkBubble()
+    }
+  }, [])
+
+  useEffect(() => {
+    if (level !== 1 || !pendingUrlRef.current) return
+    const url = pendingUrlRef.current
+    pendingUrlRef.current = null
+    // 收起动画结束后窗口才回到 64px，稍后再请求气泡空间。
+    const timer = window.setTimeout(() => offerLink(url), 350)
+    return () => window.clearTimeout(timer)
   }, [level])
+
+  useEffect(() => {
+    if (!linkPrompt) return
+    const timer = window.setTimeout(dismissLinkPrompt, 18000)
+    return () => window.clearTimeout(timer)
+  }, [linkPrompt?.url])
+
+  const savePromptedLink = (): void => {
+    if (!linkPrompt || linkPrompt.message) return
+    const result = addLink(linkPrompt.url)
+    setLinkPrompt({ ...linkPrompt, message: result.ok ? t('float.linkSaved') : result.msg })
+    if (result.ok) window.setTimeout(dismissLinkPrompt, 1100)
+  }
 
   // 拖拽状态
   const dragRef = useRef<{ startScreenX: number; startScreenY: number } | null>(null)
-  // L4 打开时冻结的 L3 内容区高度（避免窗口加高导致内容重排跳动）
+  // L4 打开时保留的 L3 高度；小屏时为下方详情预留空间。
   const [frozenMainH, setFrozenMainH] = useState<number | null>(null)
   const mainAreaRef = useRef<HTMLDivElement | null>(null)
   // 本次拖拽是否发生过移动（mouseup 后仍保留，供 click 判断是否误触）
@@ -107,6 +156,7 @@ export function FloatBar(): JSX.Element {
 
   // L2 → L3：向右加宽出标题栏（标题栏常驻），功能面板向下展开
   const openPanel = (key: string): void => {
+    setAnimationInsets(floatInsets(3))
     setActive(key)
     setPanelMounted(true)
     setPanelOpen(true)
@@ -116,8 +166,9 @@ export function FloatBar(): JSX.Element {
   }
 
   // L3 → L4：打开提示词工作区（窗口向下加高）
-  // 冻结 L3 内容区当前高度：窗口加高后 L3 区域尺寸保持不变，内容不发生重排跳动
+  // 优先保留 L3 当前高度；布局在小屏时限制上方高度，为详情留出空间。
   const openPromptWorkspace = (item: PromptItem): void => {
+    setAnimationInsets(floatInsets(4))
     const h = mainAreaRef.current?.offsetHeight
     if (h) setFrozenMainH(h)
     setActive('prompts')
@@ -130,12 +181,14 @@ export function FloatBar(): JSX.Element {
 
   // L4 → L3：关闭提示词工作区
   const closePromptWorkspace = (): void => {
+    setAnimationInsets(floatInsets(3))
     setPromptItem(null)
     window.api.setFloatBarLevel(3)
   }
 
   // L3 → L2：面板向下收起，窗口宽度收回胶囊（标题栏随之退场）
   const collapsePanel = (): void => {
+    setAnimationInsets(floatInsets(2))
     setPanelOpen(false)
     setPanelExiting(true)
     setPromptItem(null)
@@ -149,6 +202,7 @@ export function FloatBar(): JSX.Element {
 
   // 最大化按钮：面板收起后重新向下展开（有工作区则保持 L4）
   const expandPanel = (): void => {
+    setAnimationInsets(floatInsets(promptItem ? 4 : 3))
     setPanelMounted(true)
     setPanelExiting(false)
     // 等一帧再置位，保证从 @starting-style 播放入场动画
@@ -158,6 +212,7 @@ export function FloatBar(): JSX.Element {
 
   // L2 → L1：整个胶囊退场，收回到最小球
   const collapseToBall = (): void => {
+    setAnimationInsets(floatInsets(1))
     setCapsuleExiting(true)
     setPanelExiting(true)
     setPromptItem(null)
@@ -174,9 +229,11 @@ export function FloatBar(): JSX.Element {
 
   // 切换形态：L1 ↔ L2
   const toggleExpanded = (): void => {
+    if (linkPrompt) dismissLinkPrompt()
     if (expanded) {
       collapseToBall()
     } else {
+      setAnimationInsets(floatInsets(2))
       setExpanded(true)
       window.api.setFloatBarLevel(2)
     }
@@ -227,6 +284,9 @@ export function FloatBar(): JSX.Element {
       style={{
         width: '100%',
         height: '100%',
+        boxSizing: 'border-box',
+        paddingTop: animationInsets.top,
+        paddingBottom: animationInsets.bottom,
         display: 'flex',
         flexDirection: 'column',
         background: 'transparent',
@@ -259,27 +319,29 @@ export function FloatBar(): JSX.Element {
               left: 0,
               right: level >= 3 ? 8 : 0, // L3 时右端与面板对齐
               borderRadius: 27,
-              background: 'rgba(30, 30, 34, 0.62)',
-              backdropFilter: 'blur(24px) saturate(150%)',
-              WebkitBackdropFilter: 'blur(24px) saturate(150%)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
+               background: 'var(--glass-bar)',
+              backdropFilter: 'var(--capsule-filter)',
+              WebkitBackdropFilter: 'var(--capsule-filter)',
+              border: 'none',
               overflow: 'hidden',
-              zIndex: 0,
-              boxShadow: dragging ? '0 0 20px rgba(255,255,255,0.3)' : 'none'
+              zIndex: 0
             }}
           />
         )}
 
         {/* 球体吉祥物：常驻节点，展开/收起都不重建，位置恒定不跳 */}
-        <div
+        <BallCollector level={level} onActivity={value => { collectingRef.current = value }} onDismissLink={() => { if (promptRef.current) dismissLinkPrompt() }} onOpenLibrary={() => openPanel('models')}>
+        {collector => <div
           onClick={handleBallClick}
+          onDragEnter={collector.onDragEnter} onDragOver={collector.onDragOver} onDrop={collector.onDrop}
           title={expanded ? t('float.clickCollapse') : t('float.clickExpand')}
-          className="mascot-ball"
+          className={`mascot-ball${collector.active ? ' collecting' : ''}`}
           style={{
             width: 54,
             height: 54,
-            // 展开时贴最左，黑色球体正好盖住玻璃条左圆头（消除左侧灰边）；L1 时居中
-            marginLeft: expanded ? 0 : 5,
+            // 展开前后保持同一个球体位置，仅左侧气泡需要让球靠右。
+            marginLeft: !expanded && (linkPrompt?.side === 'left' || collector.side === 'left') ? 'auto' : 0,
+            marginRight: !expanded && (linkPrompt?.side === 'left' || collector.side === 'left') ? 5 : 0,
             transition: 'margin-left var(--dur-normal) var(--ease-out)',
             flexShrink: 0,
             cursor: dragging ? 'grabbing' : 'pointer',
@@ -289,25 +351,58 @@ export function FloatBar(): JSX.Element {
         >
           {/* 内层：真正的球体（圆形裁剪 + 渐变背景 + 眼睛） */}
           <div
+            className="mascot-material"
             style={{
               width: '100%',
               height: '100%',
               borderRadius: '50%',
-              background:
-                expanded
-                  ? '#000000'
-                  : 'radial-gradient(circle, #000000 0%, #000000 62%, rgba(0,0,0,0.85) 74%, rgba(0,0,0,0.55) 86%, rgba(0,0,0,0.22) 95%, transparent 100%)',
+              background: 'var(--mascot-color)',
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'flex-start',
               paddingTop: 4,
-              overflow: 'hidden',
-              boxShadow: dragging ? '0 0 20px rgba(255,255,255,0.3)' : 'none'
+              overflow: 'hidden'
             }}
           >
-            <Mascot size={50} mood={mood} />
+            <Mascot size={50} mood={collector.mood} />
           </div>
-        </div>
+        </div>}
+        </BallCollector>
+
+        {linkPrompt && !expanded && (
+          <div
+            data-no-drag
+            className="animate-fade-in link-prompt-bubble"
+            onMouseDown={(e) => e.stopPropagation()}
+            tabIndex={0}
+            style={{
+              position: 'absolute',
+              top: 4,
+              left: linkPrompt.side === 'right' ? 70 : 8,
+              right: linkPrompt.side === 'left' ? 70 : 8,
+              height: 56,
+              borderRadius: 14,
+              border: '1px solid var(--border-hover)',
+              background: 'var(--bubble-bg)',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+              boxSizing: 'border-box',
+              zIndex: 3
+            }}
+          >
+            <span style={{ position: 'absolute', top: 22, [linkPrompt.side === 'right' ? 'left' : 'right']: -5, width: 9, height: 9, transform: 'rotate(45deg)', background: 'var(--bubble-bg)', borderLeft: linkPrompt.side === 'right' ? '1px solid var(--border-hover)' : 'none', borderBottom: linkPrompt.side === 'left' ? '1px solid var(--border-hover)' : 'none' }} />
+            <div className="link-prompt-preview">
+              <div className="link-prompt-question">{linkPrompt.message ?? t('float.linkQuestion')}</div>
+              <div className="link-prompt-url" title={linkPrompt.url}>{linkPrompt.url}</div>
+            </div>
+            <LinkPromptActions
+              disabled={Boolean(linkPrompt.message)}
+              confirmLabel={t('float.linkSave')}
+              cancelLabel={t('float.linkSkip')}
+              onConfirm={savePromptedLink}
+              onCancel={dismissLinkPrompt}
+            />
+          </div>
+        )}
 
         {/* L2/L3 功能胶囊：只做布局，玻璃背景由整体层提供 */}
         {expanded && (
@@ -327,46 +422,15 @@ export function FloatBar(): JSX.Element {
               zIndex: 1
             }}
           >
-            {items.map((item, idx) => (
-              <button
-                key={item.key}
-                onClick={() => {
-                  if (movedRef.current) return
-                  if (panelOpen && active === item.key) return
-                  openPanel(item.key)
-                }}
-                title={t(item.labelKey)}
-                className="icon-item pressable"
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 'var(--radius-md)',
-                  border: 'none',
-                  flexShrink: 0,
-                  animationDelay: `${idx * 30}ms`,
-                  background:
-                    active === item.key ? 'var(--accent-tint-soft)' : 'transparent',
-                  color:
-                    active === item.key ? 'var(--accent-tint)' : 'var(--text-secondary)',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition:
-                    'background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out)',
-                  boxShadow:
-                    active === item.key ? '0 0 12px rgba(229,102,90,0.28)' : 'none'
-                }}
-                onMouseEnter={(e) => {
-                  if (active !== item.key) e.currentTarget.style.background = 'var(--bg-hover)'
-                }}
-                onMouseLeave={(e) => {
-                  if (active !== item.key) e.currentTarget.style.background = 'transparent'
-                }}
-              >
-                {item.icon}
-              </button>
-            ))}
+            <GooeyNav
+              {...GOOEY_NAV_SETTINGS}
+              className="musy-gooey-nav"
+              ariaLabel={tx('功能导航')}
+              activeIndex={Math.max(0, items.findIndex(item => item.key === active))}
+              inactive={!panelOpen || active === null}
+              items={items.map(item => ({ icon: item.icon, ariaLabel: t(item.labelKey), title: t(item.labelKey + 'Hint') }))}
+              onChange={index => { openPanel(items[index].key) }}
+            />
           </div>
         )}
 
@@ -381,22 +445,25 @@ export function FloatBar(): JSX.Element {
               flexDirection: 'row',
               alignItems: 'center',
               justifyContent: 'flex-end',
-              gap: 4,
+              gap: 6,
               paddingLeft: 8,
-              paddingRight: 8,
+              paddingRight: 0,
               zIndex: 1,
               WebkitAppRegion: 'drag'
             } as React.CSSProperties}
           >
+            <div className="toolbar-controls-frame" data-no-drag>
             {/* 设置：统一入口（模型配置 / 数据路径 / 语言） */}
-            <button
+            <InteractiveButton
               onClick={() => setShowSettings(true)}
               title={t('nav.settings')}
+              aria-label={t('nav.settings')}
               className="pressable"
               style={{
-                width: 32,
-                height: 32,
-                borderRadius: 'var(--radius-sm)',
+                width: 34,
+                height: 34,
+                flexShrink: 0,
+                borderRadius: '50%',
                 border: 'none',
                 background: 'transparent',
                 color: 'var(--text-secondary)',
@@ -414,20 +481,19 @@ export function FloatBar(): JSX.Element {
                 e.currentTarget.style.background = 'transparent'
               }}
             >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="3" />
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-              </svg>
-            </button>
+              <WindowControlIcon name="settings" />
+            </InteractiveButton>
             {/* 最大化/还原：面板收起时为「向下展开」，展开时为「收起面板」 */}
-            <button
+            <InteractiveButton
               onClick={panelOpen ? collapsePanel : expandPanel}
               title={panelOpen ? t('float.collapsePanel') : t('float.expandPanel')}
+              aria-label={panelOpen ? t('float.collapsePanel') : t('float.expandPanel')}
               className="pressable"
               style={{
-                width: 32,
-                height: 32,
-                borderRadius: 'var(--radius-sm)',
+                width: 34,
+                height: 34,
+                flexShrink: 0,
+                borderRadius: '50%',
                 border: 'none',
                 background: 'transparent',
                 color: 'var(--text-secondary)',
@@ -445,23 +511,19 @@ export function FloatBar(): JSX.Element {
                 e.currentTarget.style.background = 'transparent'
               }}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                {panelOpen ? (
-                  <polyline points="4 14 10 14 10 20" />
-                ) : (
-                  <polyline points="20 10 14 10 14 4" />
-                )}
-              </svg>
-            </button>
+              <WindowControlIcon name={panelOpen ? 'collapse' : 'expand'} />
+            </InteractiveButton>
             {/* 最小化到任务栏：隐藏面板，点击任务栏图标可恢复 */}
-            <button
+            <InteractiveButton
               onClick={() => window.api.minimizeFloatBar()}
               title={t('float.minimize')}
+              aria-label={t('float.minimize')}
               className="pressable"
               style={{
-                width: 32,
-                height: 32,
-                borderRadius: 'var(--radius-sm)',
+                width: 34,
+                height: 34,
+                flexShrink: 0,
+                borderRadius: '50%',
                 border: 'none',
                 background: 'transparent',
                 color: 'var(--text-secondary)',
@@ -479,19 +541,19 @@ export function FloatBar(): JSX.Element {
                 e.currentTarget.style.background = 'transparent'
               }}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-            </button>
+              <WindowControlIcon name="minimize" />
+            </InteractiveButton>
             {/* 退出：悬浮条没有系统托盘，必须有显式退出入口，否则进程会常驻后台关不掉 */}
-            <button
+            <InteractiveButton
               onClick={() => window.api.quitApp()}
               title={t('float.quit')}
+              aria-label={t('float.quit')}
               className="pressable"
               style={{
-                width: 32,
-                height: 32,
-                borderRadius: 'var(--radius-sm)',
+                width: 34,
+                height: 34,
+                flexShrink: 0,
+                borderRadius: '50%',
                 border: 'none',
                 background: 'transparent',
                 color: 'var(--text-secondary)',
@@ -511,11 +573,9 @@ export function FloatBar(): JSX.Element {
                 e.currentTarget.style.color = 'var(--text-secondary)'
               }}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18.36 6.64a9 9 0 1 1-12.73 12.73" />
-                <line x1="12" y1="2" x2="12" y2="12" />
-              </svg>
-            </button>
+              <WindowControlIcon name="power" />
+            </InteractiveButton>
+            </div>
           </div>
         )}
       </div>
@@ -534,17 +594,17 @@ export function FloatBar(): JSX.Element {
             margin: '0 8px 8px 0',
             borderRadius: 'var(--radius-lg)',
             overflow: 'hidden',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
-            background: 'var(--bg-panel)',
+             border: '1px solid var(--border)',
+            background: 'transparent',
             position: 'relative'
           }}
         >
-          {/* L3 主内容区：L4 时冻结为打开前的高度，内容不重排不跳动 */}
+          {/* L3 主内容区：保留原高度，小屏时让出下方详情所需空间。 */}
           <div
             ref={mainAreaRef}
             style={
               promptItem && frozenMainH
-                ? { height: frozenMainH, flexShrink: 0, overflow: 'hidden' }
+                ? { height: frozenMainH, maxHeight: 'max(0px, calc(100% - 420px))', flexShrink: 0, overflow: 'hidden' }
                 : { flex: 1, minHeight: 0 }
             }
           >
@@ -556,7 +616,7 @@ export function FloatBar(): JSX.Element {
 
           {/* L4 提示词工作区：母/子提示词 + 图片 + AI 改写 */}
           {promptItem && (
-            <div className="animate-fade-in" style={{ flex: 1, minHeight: 0, display: 'flex' }}>
+            <div style={{ flex: 1, minHeight: 0, display: 'flex' }}>
               <PromptWorkspace
                 item={promptItem}
                 onClose={closePromptWorkspace}

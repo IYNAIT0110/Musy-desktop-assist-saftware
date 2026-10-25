@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+  <path data-part="pages" d="M12 6C9.5 4 6 3.5 3 4.5v14c3-1 6.5-.5 9 1.5 2.5-2 6-2.5 9-1.5v-14c-3-1-6.5-.5-9 1.5Z" fill="currentColor" fill-opacity="0.1"/>
+  <path data-part="spine" d="M12 6v14"/>
+  <path data-part="writing" d="M6 9c1-.1 2 .1 3 .6m6 0c1-.5 2-.7 3-.6"/>
+</svg>

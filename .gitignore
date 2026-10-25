@@ -2,6 +2,9 @@
 node_modules/
 
 # Build output
+.scratch/
+# Shell scratch artifact
+'
 dist/
 out/
 release/

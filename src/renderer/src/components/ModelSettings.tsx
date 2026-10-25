@@ -1,5 +1,6 @@
+import { InteractiveButton } from './HoverFeedback'
 import { useState } from 'react'
-import { t, useLang } from '../i18n'
+import { t, tx, useLang } from '../i18n'
 
 export interface AIConfig {
   provider: string
@@ -156,7 +157,7 @@ export function ModelSettings({ onClose }: { onClose: () => void }): JSX.Element
           <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
             {t('settings.model')}
           </div>
-          <button
+          <InteractiveButton
             onClick={onClose}
             title={t('settings.close')}
             style={{
@@ -176,7 +177,7 @@ export function ModelSettings({ onClose }: { onClose: () => void }): JSX.Element
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
-          </button>
+          </InteractiveButton>
         </div>
         <ModelSettingsBody />
       </div>
@@ -218,7 +219,7 @@ export function ModelSettingsBody(): JSX.Element {
         <label style={labelStyle}>{t('model.provider')}</label>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
           {PROVIDERS.map((p) => (
-            <button
+            <InteractiveButton
               key={p.id}
               onClick={() => pickProvider(p.id)}
               style={{
@@ -233,8 +234,8 @@ export function ModelSettingsBody(): JSX.Element {
                 boxShadow: cfg.provider === p.id ? '0 0 10px rgba(255,255,255,0.15)' : 'none'
               }}
             >
-              {p.name}
-            </button>
+              {tx(p.name)}
+            </InteractiveButton>
           ))}
         </div>
       </div>
@@ -267,7 +268,7 @@ export function ModelSettingsBody(): JSX.Element {
             placeholder="sk-..."
             style={{ ...inputStyle, paddingRight: 44 }}
           />
-          <button
+          <InteractiveButton
             onClick={() => setShowKey(!showKey)}
             title={showKey ? t('model.hide') : t('model.show')}
             style={{
@@ -299,7 +300,7 @@ export function ModelSettingsBody(): JSX.Element {
                 </>
               )}
             </svg>
-          </button>
+          </InteractiveButton>
         </div>
       </div>
 
@@ -362,7 +363,7 @@ export function ModelSettingsBody(): JSX.Element {
       </div>
 
       {/* 保存 */}
-      <button
+      <InteractiveButton
         onClick={save}
         className="pressable"
         style={{
@@ -378,7 +379,7 @@ export function ModelSettingsBody(): JSX.Element {
         }}
       >
         {saved ? t('model.saved') : t('model.save')}
-      </button>
+      </InteractiveButton>
     </div>
   )
 }

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { FloatBar } from './components/FloatBar'
 import { MainWindow } from './components/MainWindow'
-import { seedFirmSites, seedIfEmpty } from './store'
+import { seedFirmSites, seedIfEmpty, seedPromptExamples } from './store'
 
 interface AppProps {
   mode: 'floatbar' | 'main'
@@ -12,6 +12,7 @@ function App({ mode }: AppProps): ReactNode {
   if (mode === 'floatbar') {
     seedIfEmpty()
     seedFirmSites() // 「事务所」收藏夹：国内外知名建筑事务所官网
+    seedPromptExamples()
   }
   return mode === 'floatbar' ? <FloatBar /> : <MainWindow />
 }

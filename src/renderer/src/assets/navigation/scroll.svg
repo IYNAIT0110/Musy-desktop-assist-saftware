@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+  <g data-part="paper">
+    <path d="M6 5h12v14H6Z" fill="currentColor" fill-opacity="0.1" stroke="none"/>
+    <path d="M6 7v10m12-10v10"/>
+  </g>
+  <path data-part="rollers" d="M6 3h12a2 2 0 0 1 0 4H6a2 2 0 0 1 0-4Zm0 14h12a2 2 0 0 1 0 4H6a2 2 0 0 1 0-4Z"/>
+  <path data-part="writing" d="M9 10.5h6m-6 3h4"/>
+</svg>

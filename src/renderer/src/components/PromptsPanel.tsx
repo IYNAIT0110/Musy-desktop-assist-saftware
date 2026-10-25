@@ -1,7 +1,12 @@
-import { useEffect, useRef, useState } from 'react'
+import { InteractiveButton, DirectionalHover } from './HoverFeedback'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { PromptImageStack } from './PromptImageStack'
+import { SmoothPromptImage } from './SmoothPromptImage'
+import { promptChildren, promptFamily } from '../promptStack'
 import {
   getPrompts,
   addPrompt,
+  addPromptsBatch,
   removePrompt,
   updatePrompt,
   getAllPromptTags,
@@ -9,10 +14,26 @@ import {
 } from '../store'
 import { loadAIConfig } from './ModelSettings'
 import { useLang } from '../i18n'
-import { t } from '../i18n'
+import { StateButton } from './InteractionMotion'
+import { rememberCard, useCardExpansion } from '../interactionMotion'
+import { t, tx } from '../i18n'
 
 /** 提示词改写模式 */
 type RewriteMode = 'rewrite' | 'expand' | 'concise' | 'translate'
+
+const tagKey = (value: string): string => value.trim().normalize('NFKC').toLocaleLowerCase()
+
+function mergeTags(selected: string[], incoming: string[], available: string[]): string[] {
+  const result = [...selected]
+  const seen = new Set(result.map(tagKey))
+  for (const raw of incoming) {
+    const key = tagKey(raw)
+    if (!key || seen.has(key)) continue
+    result.push(available.find((tag) => tagKey(tag) === key) ?? raw.trim())
+    seen.add(key)
+  }
+  return result
+}
 
 const REWRITE_MODES: { key: RewriteMode; labelKey: string }[] = [
   { key: 'expand', labelKey: 'prompts.expand' },
@@ -92,10 +113,14 @@ export function PromptsPanel({
 }): JSX.Element {
   useLang()
   const [prompts, setPrompts] = useState<PromptItem[]>(getPrompts)
+  const childrenByParent = useMemo(() => promptChildren(prompts), [prompts])
   const [allTags, setAllTags] = useState<string[]>(getAllPromptTags)
   const [activeTag, setActiveTag] = useState<string | null>(null)
   // 新建弹层
   const [showAdd, setShowAdd] = useState(false)
+  const [importing, setImporting] = useState(false)
+  const [importResult, setImportResult] = useState<Awaited<ReturnType<typeof window.api.importPromptFile>>>(null)
+  const [importSelection, setImportSelection] = useState<number[]>([])
   // toast
   const [toast, setToast] = useState<{ ok: boolean; msg: string } | null>(null)
 
@@ -131,6 +156,42 @@ export function PromptsPanel({
     setAllTags(getAllPromptTags())
   }
 
+  const startImport = async (): Promise<boolean> => {
+    const cfg = loadAIConfig()
+    if (!cfg.apiKey || !cfg.baseUrl || !cfg.model) {
+      showToast(false, t('prompts.noKey'))
+      return false
+    }
+    setImporting(true)
+    try {
+      const result = await window.api.importPromptFile(cfg, getAllPromptTags())
+      if (result) {
+        setImportResult(result)
+        setImportSelection(result.items.map((_item, index) => index))
+        return true
+      }
+      return false
+    } catch (error) {
+      showToast(false, error instanceof Error ? error.message : t('prompts.importFailed'))
+      return false
+    } finally {
+      setImporting(false)
+    }
+  }
+
+  const saveImport = (): void => {
+    if (!importResult) return
+    const selected = importResult.items.filter((_item, index) => importSelection.includes(index))
+    if (!selected.length) return
+    if (!addPromptsBatch(selected)) {
+      showToast(false, t('prompts.storageFull'))
+      return
+    }
+    refresh()
+    setImportResult(null)
+    showToast(true, `${t('prompts.imported')} ${selected.length}`)
+  }
+
   const q = query.trim().toLowerCase()
 
   const visible = prompts.filter((p) => {
@@ -150,50 +211,65 @@ export function PromptsPanel({
           display: 'flex',
           alignItems: 'center',
           gap: 6,
-          padding: '10px 14px',
+          padding: '8px 14px',
           borderBottom: '1px solid var(--border)',
-          overflowX: 'auto',
+          overflow: 'hidden',
           flexShrink: 0
         }}
       >
-        <button
-          onClick={() => setActiveTag(null)}
-          style={tagChipStyle(activeTag === null)}
+        <div
+          className="prompt-tag-scroll"
+          aria-label={t('prompts.tags')}
+          onWheel={(e) => { if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) e.currentTarget.scrollLeft += e.deltaY }}
+          style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1, minWidth: 0, paddingTop: 3, overflowX: 'auto', overflowY: 'hidden' }}
         >
-          {t('prompts.all')}
-        </button>
-        {allTags.map((tg) => (
-          <button key={tg} onClick={() => setActiveTag(tg)} style={tagChipStyle(activeTag === tg)}>
-            {tg}
-          </button>
-        ))}
-        <button
-          onClick={() => setShowAdd(true)}
-          className="pressable"
-          title={t('prompts.add')}
-          style={{
-            marginLeft: 'auto',
-            flexShrink: 0,
-            height: 28,
-            padding: '0 10px',
-            borderRadius: 'var(--radius-full)',
-            border: 'none',
-            background: 'var(--accent)',
-            color: '#0a0a0a',
-            fontSize: 12,
-            fontWeight: 600,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 4
-          }}
-        >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round">
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-          {t('prompts.add')}
-        </button>
+          <InteractiveButton onClick={() => setActiveTag(null)} style={tagChipStyle(activeTag === null)}>
+            {t('prompts.all')}
+          </InteractiveButton>
+          {allTags.map((tg) => (
+            <InteractiveButton key={tg} onClick={() => setActiveTag(tg)} style={tagChipStyle(activeTag === tg)}>
+              {tg}
+            </InteractiveButton>
+          ))}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+          <StateButton
+            type="button"
+            onAction={startImport}
+            disabled={importing}
+            className="pressable"
+            title={t('prompts.importFile')}
+            style={{ flexShrink: 0, height: 28, padding: '0 10px', borderRadius: 'var(--radius-full)', border: '1px solid var(--border)', background: 'var(--bg-input)', color: 'var(--text-secondary)', fontSize: 12, cursor: importing ? 'wait' : 'pointer' }}
+          >
+            {t('prompts.importFile')}
+          </StateButton>
+          <InteractiveButton
+            onClick={() => setShowAdd(true)}
+            className="pressable"
+            title={t('prompts.add')}
+            style={{
+              flexShrink: 0,
+              height: 28,
+              padding: '0 10px',
+              borderRadius: 'var(--radius-full)',
+              border: 'none',
+              background: 'var(--accent)',
+              color: '#0a0a0a',
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4
+            }}
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            {t('prompts.add')}
+          </InteractiveButton>
+        </div>
       </div>
 
       {/* 列表 */}
@@ -228,7 +304,7 @@ export function PromptsPanel({
           >
             <span>{q ? t('prompts.noResult') : t('prompts.empty')}</span>
             {!q && (
-              <button
+              <InteractiveButton
                 onClick={() => setShowAdd(true)}
                 style={{
                   marginTop: 4,
@@ -240,7 +316,7 @@ export function PromptsPanel({
                 }}
               >
                 {t('prompts.addFirst')}
-              </button>
+              </InteractiveButton>
             )}
           </div>
         )}
@@ -249,13 +325,14 @@ export function PromptsPanel({
           <PromptCard
             key={p.id}
             p={p}
-            onClick={() => onOpenPrompt(p)}
-            onCopy={() => {
-              void navigator.clipboard.writeText(p.text)
+            variants={childrenByParent.get(p.id) ?? []}
+            onClick={onOpenPrompt}
+            onCopy={(item) => {
+              void navigator.clipboard.writeText(item.text)
               showToast(true, t('prompts.copied'))
             }}
-            onDelete={() => {
-              removePrompt(p.id)
+            onDelete={(item) => {
+              removePrompt(item.id)
               refresh()
               showToast(true, t('prompts.deleted'))
             }}
@@ -278,6 +355,35 @@ export function PromptsPanel({
         />
       )}
 
+      {importResult && (
+        <div onClick={() => setImportResult(null)} style={{ position: 'absolute', inset: 0, zIndex: 55, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(5px)' }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ width: 'min(620px, calc(100% - 36px))', maxHeight: 'calc(100% - 48px)', display: 'flex', flexDirection: 'column', padding: 18, border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', background: 'var(--bg-card)', boxShadow: '0 16px 50px rgba(0,0,0,0.35)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
+              <strong style={{ color: 'var(--text-primary)', fontSize: 15 }}>{t('prompts.importPreview')}</strong>
+              <span style={{ color: 'var(--text-muted)', fontSize: 11, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{importResult.fileName}</span>
+              <InteractiveButton type="button" onClick={() => setImportResult(null)} style={{ marginLeft: 'auto', border: 0, background: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: 18 }}>×</InteractiveButton>
+            </div>
+            {importResult.warnings.map((warning, index) => <div key={index} style={{ color: 'var(--text-muted)', fontSize: 11, marginBottom: 6 }}>{tx(warning)}</div>)}
+            <div style={{ overflowY: 'auto', minHeight: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {importResult.items.map((item, index) => (
+                <label key={index} style={{ display: 'flex', gap: 10, padding: 9, border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', background: 'var(--bg-input)', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={importSelection.includes(index)} onChange={(e) => setImportSelection((current) => e.target.checked ? [...current, index] : current.filter((value) => value !== index))} />
+                  {item.image && <img src={item.image} alt="" style={{ width: 68, height: 68, objectFit: 'cover', borderRadius: 6, flexShrink: 0 }} />}
+                  <span style={{ minWidth: 0, color: 'var(--text-primary)', fontSize: 11 }}>
+                    <span style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: 1.5 }}>{item.text}</span>
+                    <span style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginTop: 6 }}>{item.tags.map((tag) => <span key={tag} style={{ padding: '2px 6px', borderRadius: 10, background: 'var(--accent-tint-soft)', color: 'var(--accent-tint)' }}>{tag}</span>)}</span>
+                  </span>
+                </label>
+              ))}
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, paddingTop: 12 }}>
+              <InteractiveButton type="button" onClick={() => setImportResult(null)} style={{ padding: '7px 13px', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', background: 'var(--bg-input)', color: 'var(--text-secondary)', cursor: 'pointer' }}>{t('prompts.cancel')}</InteractiveButton>
+              <InteractiveButton type="button" disabled={!importSelection.length} onClick={saveImport} style={{ padding: '7px 13px', border: 0, borderRadius: 'var(--radius-sm)', background: 'var(--accent)', color: '#111', fontWeight: 600, cursor: importSelection.length ? 'pointer' : 'not-allowed' }}>{t('prompts.importSelected')} ({importSelection.length})</InteractiveButton>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* toast */}
       {toast && (
         <div
@@ -295,7 +401,7 @@ export function PromptsPanel({
             zIndex: 60
           }}
         >
-          {toast.msg}
+          {tx(toast.msg)}
         </div>
       )}
     </div>
@@ -304,7 +410,7 @@ export function PromptsPanel({
 
 function tagChipStyle(active: boolean): React.CSSProperties {
   return {
-    height: 26,
+    height: 28,
     padding: '0 12px',
     borderRadius: 'var(--radius-full)',
     border: `1px solid ${active ? 'transparent' : 'var(--border)'}`,
@@ -318,30 +424,66 @@ function tagChipStyle(active: boolean): React.CSSProperties {
   }
 }
 
-/** 单张提示词卡片：预览图 + 正文截断 + 标签 */
+/** 卷轴封面；操作始终作用于当前展示的母／子提示词。 */
 function PromptCard({
   p,
+  variants,
   onClick,
   onCopy,
   onDelete
 }: {
   p: PromptItem
-  onClick: () => void
-  onCopy: () => void
-  onDelete: () => void
+  variants: PromptItem[]
+  onClick: (item: PromptItem) => void
+  onCopy: (item: PromptItem) => void
+  onDelete: (item: PromptItem) => void
 }): JSX.Element {
+  const family = useMemo(() => promptFamily(p, variants), [p, variants])
+  const [activeId, setActiveId] = useState(p.id)
+  const active = family.find(item => item.id === activeId) ?? p
+  const hasStack = family.length > 1
   // 删除二次确认：点一次进入待确认态（按钮变红色「删除」文字），再点才真正删除
   const [confirming, setConfirming] = useState(false)
-
-  // 鼠标离开卡片时，若正处于待确认态则自动复位
-  const resetConfirm = (): void => {
-    if (confirming) setConfirming(false)
-  }
+  const confirmDeleteRef = useRef<HTMLButtonElement>(null)
+  useEffect(() => { setConfirming(false); if (active.id !== activeId) setActiveId(active.id) }, [active.id, activeId])
+  useEffect(() => {
+    if (!confirming) return
+    const cancelOutside = (event: Event): void => {
+      if (!(event.target instanceof Node) || !confirmDeleteRef.current?.contains(event.target)) setConfirming(false)
+    }
+    const escape = (event: KeyboardEvent): void => { if (event.key === 'Escape') setConfirming(false) }
+    // Capture also sees clicks on sibling buttons that stop propagation.
+    document.addEventListener('pointerdown', cancelOutside, true)
+    document.addEventListener('click', cancelOutside, true)
+    document.addEventListener('focusin', cancelOutside, true)
+    document.addEventListener('keydown', escape, true)
+    return () => {
+      document.removeEventListener('pointerdown', cancelOutside, true)
+      document.removeEventListener('click', cancelOutside, true)
+      document.removeEventListener('focusin', cancelOutside, true)
+      document.removeEventListener('keydown', escape, true)
+    }
+  }, [confirming])
 
   return (
-    <button
-      onClick={onClick}
-      className="pressable prompt-card"
+    <DirectionalHover
+      onClick={event => { rememberCard(`prompt:${active.id}`, event.currentTarget); onClick(active) }}
+      onKeyDown={(e) => {
+        if (hasStack && e.target === e.currentTarget && ['ArrowLeft', 'ArrowRight'].includes(e.key)) {
+          e.preventDefault()
+          e.currentTarget.querySelector<HTMLButtonElement>(`[data-stack-step="${e.key === 'ArrowLeft' ? -1 : 1}"]`)?.click()
+          return
+        }
+        if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault()
+          rememberCard(`prompt:${active.id}`, e.currentTarget)
+          onClick(active)
+        }
+      }}
+      role="button"
+      tabIndex={0}
+      aria-label={active.text.slice(0, 80)}
+      className={`pressable prompt-card${hasStack ? ' has-stack' : ''}`}
       style={{
         borderRadius: 'var(--radius-md)',
         border: '1px solid var(--border)',
@@ -359,16 +501,13 @@ function PromptCard({
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.borderColor = 'var(--border-hover)'
-        e.currentTarget.style.transform = 'translateY(-1px)'
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.borderColor = 'var(--border)'
-        e.currentTarget.style.transform = 'none'
-        resetConfirm()
       }}
     >
       {/* 预览图：铺满整卡 */}
-      <div
+      {hasStack ? <PromptImageStack items={family} activeId={active.id} onChange={id => { setConfirming(false); setActiveId(id) }} /> : <div
         style={{
           position: 'absolute',
           inset: 0,
@@ -388,7 +527,7 @@ function PromptCard({
             <path d="m21 15-5-5L5 21" />
           </svg>
         )}
-      </div>
+      </div>}
 
       {/* 悬停快捷操作：图片上端复制 / 删除 */}
       <div
@@ -397,6 +536,7 @@ function PromptCard({
           position: 'absolute',
           top: 8,
           right: 8,
+          zIndex: 4,
           display: 'flex',
           gap: 6,
           opacity: 0,
@@ -405,10 +545,11 @@ function PromptCard({
           transition: 'opacity var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out)'
         }}
       >
-        <span
+        <InteractiveButton
+          type="button"
           onClick={(e) => {
             e.stopPropagation()
-            onCopy()
+            onCopy(active)
           }}
           title={t('prompts.copy')}
           style={cardActionBtnStyle}
@@ -417,12 +558,14 @@ function PromptCard({
             <rect x="9" y="9" width="13" height="13" rx="2" />
             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
           </svg>
-        </span>
+        </InteractiveButton>
         {confirming ? (
-          <span
+          <InteractiveButton
+            ref={confirmDeleteRef}
+            type="button"
             onClick={(e) => {
               e.stopPropagation()
-              onDelete()
+              onDelete(active)
             }}
             className="animate-fade-in"
             style={{
@@ -435,9 +578,10 @@ function PromptCard({
             }}
           >
             {t('prompts.delete')}
-          </span>
+          </InteractiveButton>
         ) : (
-          <span
+          <InteractiveButton
+            type="button"
             onClick={(e) => {
               e.stopPropagation()
               setConfirming(true)
@@ -449,33 +593,9 @@ function PromptCard({
               <polyline points="3 6 5 6 21 6" />
               <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
             </svg>
-          </span>
+          </InteractiveButton>
         )}
       </div>
-      {/* 悬停提示词片段：图片下端浮现半透明深色条，可滚动查看更多 */}
-      <div
-        className="prompt-card-text"
-        style={{
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          top: 0,
-          padding: '36px 10px 10px',
-          background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.7) 45%, rgba(0,0,0,0) 100%)',
-          fontSize: 11,
-          lineHeight: 1.5,
-          color: '#fff',
-          overflowY: 'auto',
-          opacity: 0,
-          transform: 'translateY(4px)',
-          pointerEvents: 'none',
-          transition: 'opacity var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out)',
-          textAlign: 'left'
-        }}
-      >
-        <div style={{ paddingBottom: 8 }}>{p.text}</div>
-      </div>
-
       {/* 标签：浮在图片左下角 */}
       <div
         className="prompt-card-tags"
@@ -489,7 +609,7 @@ function PromptCard({
           maxWidth: 'calc(100% - 16px)'
         }}
       >
-        {p.tags.slice(0, 3).map((tg) => (
+        {active.tags.slice(0, 3).map((tg) => (
           <span
             key={tg}
             style={{
@@ -507,7 +627,7 @@ function PromptCard({
           </span>
         ))}
       </div>
-    </button>
+    </DirectionalHover>
   )
 }
 
@@ -524,8 +644,13 @@ function PromptEditor({
   const [text, setText] = useState(initial?.text ?? '')
   const [image, setImage] = useState<string | undefined>(initial?.image)
   const [note, setNote] = useState(initial?.note ?? '')
-  const [tagsInput, setTagsInput] = useState(initial?.tags.join(' ') ?? '')
+  const [tagsInput, setTagsInput] = useState('')
   const [tags, setTags] = useState<string[]>(initial?.tags ?? [])
+  const existingTags = getAllPromptTags()
+  const suggestedTags = existingTags.filter((tag) =>
+    !tags.some((selected) => tagKey(selected) === tagKey(tag)) &&
+    (!tagsInput.trim() || tagKey(tag).includes(tagKey(tagsInput)))
+  )
   const fileRef = useRef<HTMLInputElement>(null)
 
   const addTagFromInput = (): void => {
@@ -535,8 +660,7 @@ function PromptEditor({
       .split(/[\s,，、]+/)
       .map((s) => s.trim())
       .filter(Boolean)
-    const merged = [...new Set([...tags, ...newTags])]
-    setTags(merged)
+    setTags(mergeTags(tags, newTags, existingTags))
     setTagsInput('')
   }
 
@@ -613,7 +737,7 @@ function PromptEditor({
           <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>
             {t('prompts.image')}
           </div>
-          <div
+          <DirectionalHover
             onClick={() => {
               // 已有图 → 点击换图（文件选择）；无图 → 先试剪贴板，没有图再弹文件选择
               if (image) {
@@ -669,7 +793,7 @@ function PromptEditor({
             ) : (
               <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('prompts.pasteImage')}</span>
             )}
-          </div>
+          </DirectionalHover>
           <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={onPickImage} />
         </div>
 
@@ -727,7 +851,7 @@ function PromptEditor({
                 outline: 'none'
               }}
             />
-            <button
+            <InteractiveButton
               onClick={addTagFromInput}
               className="pressable"
               style={{
@@ -742,8 +866,24 @@ function PromptEditor({
               }}
             >
               {t('prompts.addTag')}
-            </button>
+            </InteractiveButton>
           </div>
+          {suggestedTags.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6, marginTop: 8 }}>
+              <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('prompts.existingTags')}</span>
+              {suggestedTags.slice(0, 12).map((tag) => (
+                <InteractiveButton
+                  key={tag}
+                  type="button"
+                  onClick={() => { setTags(mergeTags(tags, [tag], existingTags)); setTagsInput('') }}
+                  className="pressable"
+                  style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-full)', background: 'var(--bg-input)', color: 'var(--text-secondary)', padding: '3px 9px', fontSize: 11, cursor: 'pointer' }}
+                >
+                  + {tag}
+                </InteractiveButton>
+              ))}
+            </div>
+          )}
           {tags.length > 0 && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
               {tags.map((tg) => (
@@ -797,7 +937,7 @@ function PromptEditor({
         </div>
 
         {/* 保存 */}
-        <button
+        <InteractiveButton
           onClick={save}
           disabled={!text.trim()}
           className="pressable"
@@ -813,7 +953,7 @@ function PromptEditor({
           }}
         >
           {t('prompts.save')}
-        </button>
+        </InteractiveButton>
       </div>
     </div>
   )
@@ -834,6 +974,15 @@ export function PromptWorkspace({
   onOpenItem: (p: PromptItem) => void
 }): JSX.Element {
   useLang()
+  const surface = useRef<HTMLDivElement>(null)
+  const initialExpansionKey = useRef(`prompt:${item.id}`)
+  const collapse = useCardExpansion(initialExpansionKey.current, surface)
+  const requestClose = (): void => { void collapse(onClose) }
+  useEffect(() => {
+    const previous = document.activeElement as HTMLElement | null
+    surface.current?.focus({ preventScroll: true })
+    return () => { if (previous?.isConnected) previous.focus({ preventScroll: true }) }
+  }, [])
   const [all, setAll] = useState<PromptItem[]>(getPrompts)
   const [mode, setMode] = useState<RewriteMode>('expand')
   const [rewriting, setRewriting] = useState(false)
@@ -882,7 +1031,7 @@ export function PromptWorkspace({
   }
   const commitTag = (): void => {
     const tg = tagInput.trim()
-    if (tg && !selected.tags.includes(tg)) setTags([...selected.tags, tg])
+    if (tg) setTags(mergeTags(selected.tags, [tg], getAllPromptTags()))
     setAddingTag(false)
     setTagInput('')
   }
@@ -1021,12 +1170,15 @@ export function PromptWorkspace({
     const back = parent
     removePrompt(selected.id)
     if (back) onOpenItem(back)
-    else onClose()
+    else requestClose()
     onToast(true, t('prompts.deleted'))
   }
 
   return (
     <div
+      ref={surface}
+      tabIndex={-1}
+      className="musy-surface musy-expand-surface"
       style={{
         position: 'relative',
         flex: 1,
@@ -1035,7 +1187,7 @@ export function PromptWorkspace({
         flexDirection: 'column',
         gap: 10,
         padding: '12px 16px 14px',
-        background: 'var(--bg-panel)',
+        backgroundColor: 'var(--bg-panel)',
         borderTop: '1px solid var(--border)'
       }}
       onClick={() => {
@@ -1048,7 +1200,7 @@ export function PromptWorkspace({
       {/* 左列：主效果图 */}
       <div style={{ width: 210, flexShrink: 0, display: 'flex', minHeight: 0 }}>
         {/* 主效果图（悬停上缘浮现"修改预览图"按钮） */}
-        <div
+        <DirectionalHover
           style={{
             flex: 1,
             minHeight: 0,
@@ -1066,13 +1218,7 @@ export function PromptWorkspace({
           onPaste={pasteImage}
         >
           {selected.image ? (
-            <img
-              src={selected.image}
-              alt=""
-              style={{ width: '100%', height: '100%', objectFit: 'cover', cursor: 'zoom-in' }}
-              draggable={false}
-              onClick={() => setZoomImg(selected.image ?? null)}
-            />
+            <SmoothPromptImage src={selected.image} onOpen={setZoomImg} />
           ) : (
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="3" width="18" height="18" rx="2" />
@@ -1094,7 +1240,7 @@ export function PromptWorkspace({
                 gap: 6
               }}
             >
-              <button
+              <InteractiveButton
                 onClick={(e) => {
                   e.stopPropagation()
                   imgInputRef.current?.click()
@@ -1120,8 +1266,8 @@ export function PromptWorkspace({
                   <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
                 </svg>
                 {t('prompts.changeImage')}
-              </button>
-              <button
+              </InteractiveButton>
+              <InteractiveButton
                 onClick={(e) => {
                   e.stopPropagation()
                   void readClipboardImage().then((blob) => {
@@ -1154,7 +1300,7 @@ export function PromptWorkspace({
                   <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
                 </svg>
                 {t('prompts.pasteImage')}
-              </button>
+              </InteractiveButton>
             </div>
           )}
           <input
@@ -1169,7 +1315,7 @@ export function PromptWorkspace({
               void blobToDataUri(f).then(applyImage)
             }}
           />
-        </div>
+        </DirectionalHover>
 
       </div>
 
@@ -1281,7 +1427,7 @@ export function PromptWorkspace({
                 }}
               >
                 {children.map((c) => (
-                  <button
+                  <DirectionalHover as="button"
                     key={c.id}
                     onClick={() => onOpenItem(c)}
                     title={c.text}
@@ -1312,7 +1458,7 @@ export function PromptWorkspace({
                         <path d="m21 15-5-5L5 21" />
                       </svg>
                     )}
-                  </button>
+                  </DirectionalHover>
                 ))}
               </div>
             </div>
@@ -1368,7 +1514,7 @@ export function PromptWorkspace({
             </span>
           ))}
           {addingTag ? (
-            <input
+            <div style={{ position: 'relative' }}><input
               autoFocus
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value)}
@@ -1396,6 +1542,20 @@ export function PromptWorkspace({
                 outline: 'none'
               }}
             />
+              {getAllPromptTags().filter((tag) =>
+                !selected.tags.some((selectedTag) => tagKey(selectedTag) === tagKey(tag)) &&
+                (!tagInput.trim() || tagKey(tag).includes(tagKey(tagInput)))
+              ).length > 0 && (
+                <div style={{ position: 'absolute', top: 26, left: 0, zIndex: 10, minWidth: 170, maxHeight: 160, overflowY: 'auto', padding: 4, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-card)', boxShadow: '0 8px 24px rgba(0,0,0,0.25)' }}>
+                  {getAllPromptTags().filter((tag) =>
+                    !selected.tags.some((selectedTag) => tagKey(selectedTag) === tagKey(tag)) &&
+                    (!tagInput.trim() || tagKey(tag).includes(tagKey(tagInput)))
+                  ).slice(0, 10).map((tag) => (
+                    <InteractiveButton key={tag} type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => { setTags(mergeTags(selected.tags, [tag], getAllPromptTags())); setAddingTag(false); setTagInput('') }} style={{ display: 'block', width: '100%', padding: '6px 8px', border: 0, borderRadius: 4, background: 'transparent', color: 'var(--text-primary)', textAlign: 'left', cursor: 'pointer', fontSize: 11 }}>{tag}</InteractiveButton>
+                  ))}
+                </div>
+              )}
+            </div>
           ) : (
             <span
               onClick={() => setAddingTag(true)}
@@ -1425,7 +1585,7 @@ export function PromptWorkspace({
           {/* 扩写 + 翻译：整体宽度对齐左侧主图列（210px），两按钮等分 */}
           <div style={{ width: 210, flexShrink: 0, display: 'flex', gap: 6 }}>
           {/* 扩写 */}
-          <button
+          <InteractiveButton
             onClick={() => {
               setMode('expand')
               setResult(null)
@@ -1449,9 +1609,9 @@ export function PromptWorkspace({
             }}
           >
             {rewriting ? t('prompts.rewriting') : t(REWRITE_MODES[0].labelKey)}
-          </button>
+          </InteractiveButton>
           {/* 翻译：等宽按钮，紧贴扩写右侧 */}
-          <button
+          <InteractiveButton
             onClick={() => {
               setMode('translate')
               setResult(null)
@@ -1475,10 +1635,10 @@ export function PromptWorkspace({
             }}
           >
             {rewriting ? t('prompts.rewriting') : t(REWRITE_MODES[1].labelKey)}
-          </button>
+          </InteractiveButton>
           </div>
           {/* 复制 */}
-          <button
+          <InteractiveButton
             onClick={() => copyText(selected.text)}
             className="pressable"
             style={{
@@ -1493,10 +1653,10 @@ export function PromptWorkspace({
             }}
           >
             {t('prompts.copy')}
-          </button>
+          </InteractiveButton>
           {/* 保存为子提示词（有改写结果时） */}
           {result && (
-            <button
+            <InteractiveButton
               onClick={saveAsChild}
               className="pressable"
               style={{
@@ -1512,12 +1672,12 @@ export function PromptWorkspace({
               }}
             >
               {t('prompts.saveAsChild')}
-            </button>
+            </InteractiveButton>
           )}
           {/* 编辑 / 保存组 */}
           {editing ? (
             <>
-              <button
+              <InteractiveButton
                 onClick={saveDraftAsChild}
                 className="pressable"
                 style={{
@@ -1534,8 +1694,8 @@ export function PromptWorkspace({
                 }}
               >
                 {t('prompts.saveAsChild')}
-              </button>
-              <button
+              </InteractiveButton>
+              <InteractiveButton
                 onClick={saveEdit}
                 className="pressable"
                 title={t('prompts.save')}
@@ -1553,10 +1713,10 @@ export function PromptWorkspace({
                 }}
               >
                 {t('prompts.save')}
-              </button>
+              </InteractiveButton>
             </>
           ) : (
-            <button
+            <InteractiveButton
               onClick={startEdit}
               title={t('prompts.edit')}
               className="pressable"
@@ -1565,11 +1725,11 @@ export function PromptWorkspace({
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
               </svg>
-            </button>
+            </InteractiveButton>
           )}
           {/* 删除（二次确认） */}
           {confirmingDel ? (
-            <button
+            <InteractiveButton
               onClick={(e) => {
                 e.stopPropagation() // 不触发根容器的"点击取消"
                 doDelete()
@@ -1589,9 +1749,9 @@ export function PromptWorkspace({
               }}
             >
               {t('prompts.delete')}
-            </button>
+            </InteractiveButton>
           ) : (
-            <button
+            <InteractiveButton
               onClick={() => setConfirmingDel(true)}
               title={t('prompts.delete')}
               className="pressable"
@@ -1601,12 +1761,12 @@ export function PromptWorkspace({
                 <polyline points="3 6 5 6 21 6" />
                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
               </svg>
-            </button>
+            </InteractiveButton>
           )}
           {/* 返回母提示词 + 退出：紧贴在一起，靠右 */}
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
             {parent && (
-              <button
+              <InteractiveButton
                 onClick={() => onOpenItem(parent)}
                 className="pressable"
                 title={t('prompts.openParent')}
@@ -1615,10 +1775,10 @@ export function PromptWorkspace({
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="15 18 9 12 15 6" />
                 </svg>
-              </button>
+              </InteractiveButton>
             )}
-            <button
-              onClick={onClose}
+            <InteractiveButton
+              onClick={requestClose}
               title={t('prompts.close')}
               className="pressable"
               style={{ ...iconBtnStyle, width: 28, height: 28 }}
@@ -1627,7 +1787,7 @@ export function PromptWorkspace({
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
               </svg>
-            </button>
+            </InteractiveButton>
           </div>
         </div>
       {/* 悬停图片放大预览：完整尺寸居中展示，缩放入场动画 */}
@@ -1645,6 +1805,7 @@ export function PromptWorkspace({
           }}
           onClick={() => setZoomImg(null)}
         >
+          <DirectionalHover style={{ display: 'inline-flex', maxWidth: '82vw', maxHeight: '82vh', borderRadius: 'var(--radius-md)' }}>
           <img
             src={zoomImg}
             alt=""
@@ -1658,6 +1819,7 @@ export function PromptWorkspace({
               pointerEvents: 'none'
             }}
           />
+          </DirectionalHover>
         </div>
       )}
 
@@ -1679,7 +1841,7 @@ export function PromptWorkspace({
             whiteSpace: 'nowrap'
           }}
         >
-          {toast.msg}
+          {tx(toast.msg)}
         </div>
       )}
     </div>
@@ -1704,6 +1866,7 @@ const iconBtnStyle: React.CSSProperties = {
 const cardActionBtnStyle: React.CSSProperties = {
   width: 26,
   height: 26,
+  border: 0,
   borderRadius: 'var(--radius-sm)',
   background: 'rgba(0,0,0,0.62)',
   backdropFilter: 'blur(4px)',

@@ -1,12 +1,14 @@
 {
   "name": "musy-desktop-assist",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "面向设计工作者的桌面悬窗辅助工具",
   "main": "./out/main/index.js",
   "author": "IYNAIT0110",
   "license": "MIT",
   "private": true,
   "scripts": {
+    "test": "node scripts/test.cjs",
+    "test:treasure": "node --test tests/treasureStore.test.cjs",
     "dev": "node scripts/dev.js",
     "build": "electron-vite build",
     "preview": "electron-vite preview",
@@ -18,7 +20,9 @@
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.1",
-    "@electron-toolkit/utils": "^3.0.0"
+    "@electron-toolkit/utils": "^3.0.0",
+    "mammoth": "^1.13.0",
+    "pdfjs-dist": "5.4.149"
   },
   "devDependencies": {
     "@electron-toolkit/tsconfig": "^1.0.1",

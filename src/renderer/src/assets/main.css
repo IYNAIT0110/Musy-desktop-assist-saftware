@@ -9,6 +9,7 @@
 
   /* 强调色：低饱和暖橙（Raycast 珊瑚红降饱和版），仅作点缀，不铺满按钮 */
   --accent: #f5f5f7;
+  --accent-ink: #0d0d0f;
   --accent-glow: #ffffff;
   --accent-soft: rgba(255, 255, 255, 0.1);
   /* 品牌点缀色（选中态 / 图标高亮 / 焦点环） */
@@ -93,6 +94,16 @@ body,
 .child-strip::-webkit-scrollbar-track {
   background: transparent;
 }
+.prompt-tag-scroll::-webkit-scrollbar {
+  height: 3px;
+}
+.prompt-tag-scroll::-webkit-scrollbar-thumb {
+  background: var(--border-hover);
+  border-radius: var(--radius-full);
+}
+.prompt-tag-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
 ::-webkit-scrollbar-thumb {
   background: var(--border-hover);
   border-radius: var(--radius-full);
@@ -161,6 +172,135 @@ body,
 /* 内容切换：极轻淡入（高频操作，避免弹跳拖沓） */
 .animate-fade-in {
   animation: fade-in var(--dur-fast) var(--ease-out) both;
+}
+
+.link-prompt-bubble {
+  overflow: hidden;
+  outline: none;
+}
+
+.link-prompt-bubble:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.link-prompt-preview,
+.link-prompt-actions {
+  position: absolute;
+  inset: 0;
+}
+
+.link-prompt-preview {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 7px 11px;
+  box-sizing: border-box;
+  transition: opacity 120ms ease;
+}
+
+.link-prompt-question {
+  color: var(--text-primary);
+  font-size: 13px;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.link-prompt-url {
+  color: var(--text-muted);
+  font-size: 9.5px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.link-prompt-actions {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  background: var(--bubble-bg);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 120ms ease, visibility 120ms;
+}
+
+.link-prompt-actions button {
+  position: relative;
+  z-index: 1;
+  border: 0;
+  border-radius: 0;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.link-prompt-confirm {
+  background: transparent;
+  color: var(--accent-ink);
+}
+
+.link-prompt-confirm:hover {
+  color: var(--accent-ink);
+}
+
+.link-prompt-cancel {
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.link-prompt-cancel:hover {
+  color: var(--text-primary);
+}
+
+.link-prompt-jelly {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  fill: var(--accent);
+}
+
+.link-prompt-actions button:active {
+  transform: scale(.97);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .link-prompt-bubble:not(:has(.link-prompt-confirm:disabled)):hover .link-prompt-preview {
+    opacity: 0;
+  }
+
+  .link-prompt-bubble:not(:has(.link-prompt-confirm:disabled)):hover .link-prompt-actions {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+.link-prompt-bubble:focus-within:not(:has(.link-prompt-confirm:disabled)) .link-prompt-preview {
+  opacity: 0;
+}
+
+.link-prompt-bubble:focus-within:not(:has(.link-prompt-confirm:disabled)) .link-prompt-actions {
+  opacity: 1;
+  visibility: visible;
+}
+
+@media (hover: none) {
+  .link-prompt-bubble:not(:has(.link-prompt-confirm:disabled)) .link-prompt-actions {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .link-prompt-bubble:not(:has(.link-prompt-confirm:disabled)) .link-prompt-preview {
+    opacity: 0;
+  }
 }
 
 @keyframes fade-in {
@@ -394,17 +534,14 @@ body,
 
 /* === 可按压元素：统一按压反馈（hover 门控 + :active 缩小） === */
 
-/* 去掉点击后的默认 focus 描边（白色 outline 与发光选中态叠加很突兀） */
-button:focus,
+/* 键盘导航保留清晰的主题色焦点环 */
 button:focus-visible {
-  outline: none;
+  outline: 2px solid var(--accent-tint);
+  outline-offset: 2px;
 }
 
 /* hover 缩放：仅精确指针设备（鼠标），触屏 tap 不误触 */
 @media (hover: hover) and (pointer: fine) {
-  .pressable:hover {
-    transform: scale(1.06);
-  }
   .pressable:active {
     transform: scale(0.97);
   }
@@ -438,25 +575,17 @@ button:focus-visible {
 }
 
 /* 提示词卡片：悬停时图片上端浮现复制/删除按钮 */
-.prompt-card:hover .prompt-card-actions {
+.prompt-card:hover .prompt-card-actions,
+.prompt-card:focus-within .prompt-card-actions {
   opacity: 1 !important;
   transform: translateY(0) !important;
   pointer-events: auto !important;
 }
 
-/* 提示词卡片：悬停时图片下端浮现提示词片段 */
-.prompt-card:hover .prompt-card-text {
-  opacity: 1 !important;
-  transform: translateY(0) !important;
-  pointer-events: auto !important;
-}
 
-/* 悬停时标签隐去，避免与提示词片段打架 */
+/* 封面标签在浏览与切换预览时保持可见 */
 .prompt-card .prompt-card-tags {
   transition: opacity var(--dur-fast) var(--ease-out);
-}
-.prompt-card:hover .prompt-card-tags {
-  opacity: 0;
 }
 
 /* L4 提示词工作区：悬停图片放大预览浮层（暗化背景 + 缩放入场动画） */

@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react'
+import { InteractiveButton, DirectionalHover } from './HoverFeedback'
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import {
   getLinks,
   getGroups,
   addGroup,
+  moveGroup,
   renameGroup,
   removeGroup,
   addLink,
@@ -14,6 +16,7 @@ import {
 } from '../store'
 import { loadAIConfig } from './ModelSettings'
 import { PromptsPanel } from './PromptsPanel'
+import { TreasurePanel } from './TreasurePanel'
 import { SHORTCUT_BOOKS, shortcutCount, type SoftwareShortcuts } from '../data/shortcuts'
 import { LINK_ICON_OVERRIDES, LINK_WIDE_ICON_HOSTS } from '../data/linkIcons'
 import logoSketchup from '../assets/logos/sketchup.svg?raw'
@@ -26,7 +29,8 @@ const SW_LOGOS: Record<string, string> = {
   rhino: logoRhinoceros,
   cad: logoAutocad
 }
-import { t, useLang } from '../i18n'
+import { StateButton } from './InteractionMotion'
+import { t, tx, useLang } from '../i18n'
 
 type ModuleKey = 'links' | 'prompts' | 'shortcuts' | 'polish' | 'models'
 
@@ -123,7 +127,7 @@ function LinkTile({
     ? `linear-gradient(to bottom, ${dominant.replace('rgb', 'rgba').replace(')', ', 0.30)')}, ${dominant.replace('rgb', 'rgba').replace(')', ', 0.14)')})`
     : 'linear-gradient(to bottom, rgba(255,255,255,0.10), rgba(255,255,255,0.03))'
   return (
-    <div
+    <DirectionalHover
       className="link-tile animate-fade-in"
       draggable
       onDragStart={(e) => {
@@ -223,7 +227,7 @@ function LinkTile({
         {link.title}
       </div>
       {/* 删除按钮：hover 卡片时右上角浮现 */}
-      <button
+      <InteractiveButton
         className="link-del"
         onClick={(e) => {
           e.stopPropagation()
@@ -253,8 +257,8 @@ function LinkTile({
           <line x1="18" y1="6" x2="6" y2="18" />
           <line x1="6" y1="6" x2="18" y2="18" />
         </svg>
-      </button>
-    </div>
+      </InteractiveButton>
+    </DirectionalHover>
   )
 }
 
@@ -359,12 +363,13 @@ export function MainWindow({
 
   return (
     <div
+      className="musy-surface"
       style={{
         width: '100%',
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        background: 'var(--bg-panel)',
+        backgroundColor: 'var(--bg-panel)',
         position: 'relative'
       }}
     >
@@ -372,11 +377,11 @@ export function MainWindow({
       <div
         style={{
           position: 'absolute',
-          right: 28,
-          bottom: 20,
+          right: 18,
+          bottom: 9,
           display: 'flex',
           alignItems: 'center',
-          gap: 4,
+          gap: 6,
           pointerEvents: 'none',
           opacity: 0.6,
           userSelect: 'none'
@@ -515,7 +520,7 @@ export function MainWindow({
         style={{
           flex: 1,
           minHeight: 0,
-          margin: '0 12px 12px',
+          margin: '0 12px 30px',
           borderRadius: 'var(--radius-lg)',
           background: 'var(--bg-card)',
           border: '1px solid var(--border)',
@@ -529,6 +534,8 @@ export function MainWindow({
           <ShortcutsPanel query={query} />
         ) : active === 'prompts' ? (
           <PromptsPanel query={query} onOpenPrompt={(p) => onOpenPrompt?.(p)} />
+        ) : active === 'models' ? (
+          <TreasurePanel query={query} />
         ) : (
           <div
             key={active + query}
@@ -613,7 +620,7 @@ function ShortcutsPanel({ query }: { query: string }): JSX.Element {
   const q = query.trim().toLowerCase()
 
   const matchItem = (desc: string, keys: string[]): boolean =>
-    !q || desc.toLowerCase().includes(q) || keys.join(' ').toLowerCase().includes(q)
+    !q || [desc, tx(desc), ...keys, ...keys.map(key => tx(key))].join(' ').toLowerCase().includes(q)
 
   // —— 详情页 ——
   if (sel) {
@@ -633,7 +640,7 @@ function ShortcutsPanel({ query }: { query: string }): JSX.Element {
             flexShrink: 0
           }}
         >
-          <button
+          <InteractiveButton
             onClick={() => setSel(null)}
             className="pressable"
             title={t('kb.back')}
@@ -654,7 +661,7 @@ function ShortcutsPanel({ query }: { query: string }): JSX.Element {
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M15 18l-6-6 6-6" />
             </svg>
-          </button>
+          </InteractiveButton>
           <span
             style={{
               width: 8,
@@ -671,7 +678,7 @@ function ShortcutsPanel({ query }: { query: string }): JSX.Element {
               whiteSpace: 'nowrap'
             }}
           >
-            {sel.name}
+            {tx(sel.name)}
           </span>
           <span style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
             {shortcutCount(sel)} {t('kb.count')}
@@ -710,7 +717,7 @@ function ShortcutsPanel({ query }: { query: string }): JSX.Element {
             </div>
           )}
           {cats.map((c) => (
-            <div key={c.name} style={{ marginBottom: 14 }}>
+            <div key={tx(c.name)} style={{ marginBottom: 14 }}>
               <div
                 style={{
                   fontSize: 11,
@@ -719,7 +726,7 @@ function ShortcutsPanel({ query }: { query: string }): JSX.Element {
                   padding: '4px 2px 6px'
                 }}
               >
-                {c.name}
+                {tx(c.name)}
               </div>
               <div
                 style={{
@@ -753,11 +760,11 @@ function ShortcutsPanel({ query }: { query: string }): JSX.Element {
                         textOverflow: 'ellipsis'
                       }}
                     >
-                      {it.desc}
+                      {tx(it.desc)}
                     </span>
                     <span style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
                       {it.keys.map((k, j) => (
-                        <Kbd key={j}>{k}</Kbd>
+                        <Kbd key={j}>{tx(k)}</Kbd>
                       ))}
                     </span>
                   </div>
@@ -794,7 +801,7 @@ function ShortcutsPanel({ query }: { query: string }): JSX.Element {
 function ShortcutBookCard({ s, onOpen }: { s: SoftwareShortcuts; onOpen: () => void }): JSX.Element {
   const logo = SW_LOGOS[s.key]
   return (
-    <button
+    <DirectionalHover as="button"
       onClick={onOpen}
       className="pressable"
       style={{
@@ -812,12 +819,10 @@ function ShortcutBookCard({ s, onOpen }: { s: SoftwareShortcuts; onOpen: () => v
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.borderColor = 'rgba(255,255,255,0.35)'
-        e.currentTarget.style.transform = 'translateY(-2px)'
         e.currentTarget.style.backgroundColor = 'var(--bg-hover)'
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.borderColor = 'var(--border)'
-        e.currentTarget.style.transform = 'none'
         e.currentTarget.style.backgroundColor = 'var(--bg-input)'
       }}
     >
@@ -843,7 +848,7 @@ function ShortcutBookCard({ s, onOpen }: { s: SoftwareShortcuts; onOpen: () => v
         />
       </span>
       <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>
-        {s.name}
+        {tx(s.name)}
       </span>
       <span
         style={{
@@ -870,7 +875,7 @@ function ShortcutBookCard({ s, onOpen }: { s: SoftwareShortcuts; onOpen: () => v
       >
         {shortcutCount(s)} {t('kb.itemCount')}
       </span>
-    </button>
+    </DirectionalHover>
   )
 }
 
@@ -895,6 +900,98 @@ function LinksPanel({ query }: { query: string }): JSX.Element {
   const [editingName, setEditingName] = useState('')
   // 待确认删除的分组名（null 表示无）
   const [confirmDel, setConfirmDel] = useState<string | null>(null)
+  const groupListRef = useRef<HTMLDivElement | null>(null)
+  const groupPressCleanupRef = useRef<(() => void) | null>(null)
+  const suppressGroupClickRef = useRef(false)
+  const [dragGroup, setDragGroup] = useState<string | null>(null)
+  const [groupDrop, setGroupDrop] = useState<{ name: string; after: boolean } | null>(null)
+
+  // 按住分组 350ms 才开始拖动；普通点击仍用于切换分组。
+  const startGroupPress = (e: ReactPointerEvent<HTMLButtonElement>, name: string): void => {
+    if (e.button !== 0 || name === '全部' || name === '默认') return
+    groupPressCleanupRef.current?.()
+    const pointerId = e.pointerId
+    const button = e.currentTarget
+    const startX = e.clientX
+    const startY = e.clientY
+    let pointerX = startX
+    let pointerY = startY
+    let active = false
+    let drop: { name: string; after: boolean } | null = null
+    let scrollTimer: number | null = null
+    const previousUserSelect = document.body.style.userSelect
+
+    const updateTarget = (): void => {
+      const row = document.elementFromPoint(pointerX, pointerY)?.closest<HTMLElement>('[data-musy-group]')
+      const target = row?.dataset.musyGroup
+      if (!row || !target || target === name || target === '全部' || target === '默认') {
+        drop = null
+      } else {
+        const rect = row.getBoundingClientRect()
+        drop = { name: target, after: pointerY >= rect.top + rect.height / 2 }
+      }
+      setGroupDrop(drop)
+    }
+    const cleanup = (): void => {
+      window.clearTimeout(pressTimer)
+      if (scrollTimer !== null) window.clearInterval(scrollTimer)
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+      window.removeEventListener('pointercancel', onCancel)
+      if (button.hasPointerCapture(pointerId)) button.releasePointerCapture(pointerId)
+      document.body.style.userSelect = previousUserSelect
+      groupPressCleanupRef.current = null
+    }
+    const onMove = (event: PointerEvent): void => {
+      if (event.pointerId !== pointerId) return
+      pointerX = event.clientX
+      pointerY = event.clientY
+      if (!active) {
+        if (Math.hypot(pointerX - startX, pointerY - startY) > 6) cleanup()
+        return
+      }
+      event.preventDefault()
+      updateTarget()
+    }
+    const onUp = (event: PointerEvent): void => {
+      if (event.pointerId !== pointerId) return
+      cleanup()
+      if (!active) return
+      suppressGroupClickRef.current = true
+      window.setTimeout(() => { suppressGroupClickRef.current = false }, 80)
+      if (drop && moveGroup(name, drop.name, drop.after)) setGroupsState(getGroups())
+      setDragGroup(null)
+      setGroupDrop(null)
+    }
+    const onCancel = (event: PointerEvent): void => {
+      if (event.pointerId !== pointerId) return
+      cleanup()
+      setDragGroup(null)
+      setGroupDrop(null)
+    }
+    const pressTimer = window.setTimeout(() => {
+      active = true
+      button.setPointerCapture(pointerId)
+      document.body.style.userSelect = 'none'
+      setDragGroup(name)
+      scrollTimer = window.setInterval(() => {
+        const list = groupListRef.current
+        if (!list) return
+        const rect = list.getBoundingClientRect()
+        const step = pointerY < rect.top + 25 ? -8 : pointerY > rect.bottom - 25 ? 8 : 0
+        if (step) {
+          list.scrollTop += step
+          updateTarget()
+        }
+      }, 40)
+    }, 350)
+    window.addEventListener('pointermove', onMove, { passive: false })
+    window.addEventListener('pointerup', onUp)
+    window.addEventListener('pointercancel', onCancel)
+    groupPressCleanupRef.current = cleanup
+  }
+
+  useEffect(() => () => groupPressCleanupRef.current?.(), [])
 
   const handleDrop = (targetId: string): void => {
     if (dragId && dragId !== targetId) {
@@ -929,13 +1026,13 @@ function LinksPanel({ query }: { query: string }): JSX.Element {
   }
 
   // 收藏剪贴板链接（+ 按钮），收藏后自动用大模型总结简介
-  const collectClipboard = async (): Promise<void> => {
+  const collectClipboard = async (): Promise<boolean> => {
     let text = ''
     try {
       text = await window.api.readClipboardText()
     } catch {
       showToast(false, t('links.clipboardFail'))
-      return
+      return false
     }
     const res = addLink(text)
     if (res.ok) {
@@ -951,6 +1048,7 @@ function LinksPanel({ query }: { query: string }): JSX.Element {
       }
     }
     showToast(res.ok, res.msg)
+    return res.ok
   }
 
   // 新建分组
@@ -1012,26 +1110,28 @@ function LinksPanel({ query }: { query: string }): JSX.Element {
         style={{
           width: 168,
           flexShrink: 0,
+          minHeight: 0,
           padding: 12,
           display: 'flex',
           flexDirection: 'column',
           gap: 10,
           borderRight: '1px solid var(--border)',
           background: 'var(--bg-panel)',
-          overflowY: 'auto'
+          overflow: 'hidden'
         }}
       >
         {/* 主操作按钮：白色胶囊（高级软件主 CTA 皆为白/浅色，非鲜艳色铺满） */}
-        <button
-          onClick={() => void collectClipboard()}
+        <StateButton
+          onAction={collectClipboard}
           title={t('links.collectHint')}
           className="pressable"
           style={{
             height: 40,
+            flexShrink: 0,
             borderRadius: 'var(--radius-md)',
             border: 'none',
-            background: '#f5f5f7',
-            color: '#0d0d0f',
+            background: 'var(--accent)',
+            color: 'var(--accent-ink)',
             fontSize: 13,
             fontWeight: 600,
             cursor: 'pointer',
@@ -1050,13 +1150,13 @@ function LinksPanel({ query }: { query: string }): JSX.Element {
             <line x1="5" y1="12" x2="19" y2="12" />
           </svg>
           {t('links.collect')}
-        </button>
+        </StateButton>
 
         {/* 整理收藏：分组列表 */}
-        <div style={{ fontSize: 11, color: 'var(--text-muted)', padding: '4px 4px 0', letterSpacing: 1 }}>
+        <div style={{ flexShrink: 0, fontSize: 11, color: 'var(--text-muted)', padding: '4px 4px 0', letterSpacing: 1 }}>
           {t('links.organize')}
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <div ref={groupListRef} style={{ flex: 1, minHeight: 0, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}>
           {allGroups.map((g) => {
             // 「全部」「默认」为系统分组，不可重命名/删除
             const isSystem = g === '全部' || g === '默认'
@@ -1098,6 +1198,7 @@ function LinksPanel({ query }: { query: string }): JSX.Element {
               <div
                 key={g}
                 className="group-row"
+                data-musy-group={g}
                 onMouseLeave={() => {
                   if (confirmDel === g) setConfirmDel(null)
                 }}
@@ -1107,11 +1208,19 @@ function LinksPanel({ query }: { query: string }): JSX.Element {
                   alignItems: 'center',
                   borderRadius: 'var(--radius-sm)',
                   background: currentGroup === g ? 'var(--accent-tint-soft)' : 'transparent',
+                  opacity: dragGroup === g ? 0.55 : 1,
+                  boxShadow: groupDrop?.name === g
+                    ? groupDrop.after ? 'inset 0 -2px 0 var(--accent-tint)' : 'inset 0 2px 0 var(--accent-tint)'
+                    : 'none',
                   transition: 'background-color var(--dur-fast) var(--ease-out)'
                 }}
               >
-                <button
-                  onClick={() => setCurrentGroup(g)}
+                <InteractiveButton
+                  onPointerDown={(e) => startGroupPress(e, g)}
+                  title={isSystem ? undefined : t('links.dragGroup')}
+                  onClick={() => {
+                    if (!suppressGroupClickRef.current) setCurrentGroup(g)
+                  }}
                   style={{
                     flex: 1,
                     minWidth: 0,
@@ -1123,7 +1232,8 @@ function LinksPanel({ query }: { query: string }): JSX.Element {
                     fontSize: 12,
                     textAlign: 'left',
                     padding: '0 10px',
-                    cursor: 'pointer',
+                    cursor: dragGroup === g ? 'grabbing' : 'pointer',
+                    touchAction: 'pan-y',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between'
@@ -1145,7 +1255,7 @@ function LinksPanel({ query }: { query: string }): JSX.Element {
                   >
                     {groupCount(g)}
                   </span>
-                </button>
+                </InteractiveButton>
                 {!isSystem && (
                   <div
                     className="group-actions"
@@ -1159,7 +1269,7 @@ function LinksPanel({ query }: { query: string }): JSX.Element {
                       transition: 'opacity var(--dur-fast) var(--ease-out)'
                     }}
                   >
-                    <button
+                    <InteractiveButton
                       onClick={() => {
                         setEditingGroup(g)
                         setEditingName(g)
@@ -1181,8 +1291,8 @@ function LinksPanel({ query }: { query: string }): JSX.Element {
                       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
                       </svg>
-                    </button>
-                    <button
+                    </InteractiveButton>
+                    <InteractiveButton
                       onClick={() => setConfirmDel(g)}
                       title={t('links.deleteHint')}
                       style={{
@@ -1202,7 +1312,7 @@ function LinksPanel({ query }: { query: string }): JSX.Element {
                         <line x1="18" y1="6" x2="6" y2="18" />
                         <line x1="6" y1="6" x2="18" y2="18" />
                       </svg>
-                    </button>
+                    </InteractiveButton>
                   </div>
                 )}
                 {/* 删除二次确认：点击删除后弹出确认条 */}
@@ -1226,7 +1336,7 @@ function LinksPanel({ query }: { query: string }): JSX.Element {
                     <span style={{ fontSize: 11, color: '#ffb3b3', whiteSpace: 'nowrap' }}>
                       {t('links.confirmDelete')}
                     </span>
-                    <button
+                    <InteractiveButton
                       onClick={() => {
                         doRemoveGroup(g)
                         setConfirmDel(null)
@@ -1245,8 +1355,8 @@ function LinksPanel({ query }: { query: string }): JSX.Element {
                       }}
                     >
                       {t('links.confirm')}
-                    </button>
-                    <button
+                    </InteractiveButton>
+                    <InteractiveButton
                       onClick={() => setConfirmDel(null)}
                       title={t('links.cancel')}
                       style={{
@@ -1266,7 +1376,7 @@ function LinksPanel({ query }: { query: string }): JSX.Element {
                         <line x1="18" y1="6" x2="6" y2="18" />
                         <line x1="6" y1="6" x2="18" y2="18" />
                       </svg>
-                    </button>
+                    </InteractiveButton>
                   </div>
                 )}
               </div>
@@ -1275,7 +1385,7 @@ function LinksPanel({ query }: { query: string }): JSX.Element {
         </div>
 
         {/* 新建分组 */}
-        <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
+        <div style={{ display: 'flex', flexShrink: 0, gap: 6, marginTop: 4 }}>
           <input
             value={newGroup}
             onChange={(e) => setNewGroup(e.target.value)}
@@ -1296,7 +1406,7 @@ function LinksPanel({ query }: { query: string }): JSX.Element {
               outline: 'none'
             }}
           />
-          <button
+          <InteractiveButton
             onClick={createGroup}
             title={t('links.addGroup')}
             style={{
@@ -1317,7 +1427,7 @@ function LinksPanel({ query }: { query: string }): JSX.Element {
               <line x1="12" y1="5" x2="12" y2="19" />
               <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
-          </button>
+          </InteractiveButton>
         </div>
       </div>
 
@@ -1413,7 +1523,7 @@ function LinksPanel({ query }: { query: string }): JSX.Element {
             {t('links.moveTo')}
           </div>
           {allGroups.map((g) => (
-            <button
+            <InteractiveButton
               key={g}
               onClick={() => {
                 updateLinkGroup(ctxMenu.link.id, g === '全部' ? '默认' : g)
@@ -1451,7 +1561,7 @@ function LinksPanel({ query }: { query: string }): JSX.Element {
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               )}
-            </button>
+            </InteractiveButton>
           ))}
         </div>
       )}
@@ -1503,7 +1613,7 @@ function LinksPanel({ query }: { query: string }): JSX.Element {
             zIndex: 10
           }}
         >
-          {toast.msg}
+          {tx(toast.msg)}
         </div>
       )}
     </div>

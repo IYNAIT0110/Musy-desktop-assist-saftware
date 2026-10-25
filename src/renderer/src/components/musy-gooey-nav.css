@@ -1,0 +1,18 @@
+/* Preserve the existing 40px icon hit areas, with the reference's Medium frame. */
+.musy-gooey-nav.gooey-nav { --gn-gap:6px; flex-shrink:0; }
+.musy-gooey-nav.gooey-nav--framed,.toolbar-controls-frame { background:var(--bg-input); box-shadow:0 1px 6px rgba(0,0,0,.18); backdrop-filter:none; -webkit-backdrop-filter:none; }
+.toolbar-controls-frame { position:relative; display:flex; align-items:center; gap:6px; height:52px; padding:6px; box-sizing:border-box; border-radius:999px; -webkit-app-region:no-drag; }
+.toolbar-controls-frame::before { content:''; position:absolute; inset:0; border-radius:inherit; box-shadow:inset 0 0 0 1px rgba(255,255,255,.08),inset 0 1px 0 rgba(255,255,255,.07); pointer-events:none; }
+.musy-gooey-nav .gooey-nav__list { flex-wrap:nowrap; }
+.musy-gooey-nav .gooey-nav__link { width:40px; height:40px; box-sizing:border-box; padding:0; justify-content:center; border-radius:999px; }
+.musy-gooey-nav .gooey-nav__icon { align-items:center; justify-content:center; }
+.musy-gooey-nav .gooey-nav__icon svg { width:20px; height:20px; }
+.musy-gooey-nav .gooey-nav__list--active { user-select:none; }
+.musy-gooey-nav[data-inactive=true] .gooey-nav__canvas,
+.musy-gooey-nav[data-inactive=true] .gooey-nav__fallback,
+.musy-gooey-nav[data-inactive=true] .gooey-nav__list--active { visibility:hidden !important; }
+.musy-gooey-nav[data-inactive=true] .gooey-nav__link:hover { background:var(--gn-frame-highlight); }
+/* This navigation owns its hover feedback; no old fill, dot or text slide. */
+.musy-gooey-nav .musy-hover-fill,.musy-gooey-nav .musy-hover-active { display:none; }
+.musy-gooey-nav .musy-hover-rest { padding:0; opacity:1 !important; transform:none !important; justify-content:center; }
+@media (prefers-reduced-motion:reduce) { .musy-gooey-nav .gooey-nav__link { transition:none; } }

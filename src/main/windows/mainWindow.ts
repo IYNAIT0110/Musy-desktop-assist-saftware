@@ -1,4 +1,4 @@
-import { BrowserWindow, shell, app } from 'electron'
+import { BrowserWindow, shell, app, screen } from 'electron'
 import { join } from 'path'
 
 let mainWindow: BrowserWindow | null = null
@@ -11,7 +11,7 @@ export function createMainWindow(): BrowserWindow {
 
   mainWindow = new BrowserWindow({
     width: 760,
-    height: 560,
+    height: Math.min(680, Math.max(64, screen.getDisplayNearestPoint(screen.getCursorScreenPoint()).workArea.height - 12)),
     show: false,
     autoHideMenuBar: true,
     frame: false,

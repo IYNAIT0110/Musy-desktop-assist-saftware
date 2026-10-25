@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <filter id="fibers"><feTurbulence type="fractalNoise" baseFrequency=".18 .72" numOctaves="3" seed="23" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/><feDiffuseLighting surfaceScale="2.4" diffuseConstant=".8" lighting-color="#fff"><feDistantLight azimuth="225" elevation="48"/></feDiffuseLighting></filter>
+  <rect width="192" height="192" filter="url(#fibers)" opacity=".85"/>
+  <g fill="none" stroke="#fff" stroke-width=".65" stroke-linecap="round" opacity=".28"><path d="M10 7q-2 4 0 7m12 13q3 4 0 8m19-20q-3 5-1 9m14 25q2 4 0 8m13-37q-2 5 0 8m14 30q3 5 1 9m11-36q-3 5-1 8m16 26q2 5 0 9m19-39q3 4 1 8m15 33q-2 4 0 8m12-41q-2 5 0 8m14 22q3 4 1 8M8 87q3 5 0 9m16 17q-3 5-1 8m18-34q2 5 0 9m14 27q-2 5 0 8m17-39q-3 5-1 8m15 29q3 4 0 9m16-31q-2 4 0 8m15 24q3 5 1 9m14-43q-2 5 0 8m17 28q2 4 0 8m16-38q-3 5-1 9m16 28q2 4 0 8M15 149q-2 5 0 8m19 14q3 5 1 9m18-28q-3 5 0 9m15 17q2 5 0 8m20-30q-2 5 0 8m18 17q3 4 1 8m17-30q-2 5 0 8m18 19q3 5 0 9m16-29q-2 5 0 8m15 14q2 5 0 8"/></g>
+</svg>

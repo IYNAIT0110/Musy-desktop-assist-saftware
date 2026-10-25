@@ -4,6 +4,7 @@
  * - 若用户选择了本地文件夹，则每次变更自动同步写盘 musy-data.json（备份/迁移）
  */
 import { t } from './i18n'
+import { PROMPT_EXAMPLES } from './data/promptExamples'
 
 export interface LinkItem {
   id: string
@@ -81,6 +82,9 @@ interface SeedEntry {
 }
 
 const SEED_SITES: SeedEntry[] = [
+  { title: 'Google', url: 'https://www.google.com/', group: '默认', desc: '网页搜索入口' },
+  { title: 'Google Drive', url: 'https://drive.google.com/', group: '默认', desc: '在线文件存储与协作入口' },
+  { title: 'ChatGPT', url: 'https://chatgpt.com/', group: '默认', desc: 'AI 对话与创作工具入口' },
   // 灵感与案例
   { title: '谷德设计网', url: 'https://www.gooood.cn/', group: '灵感', desc: '中文建筑/景观/室内设计案例与资讯平台' },
   { title: '有方空间', url: 'https://www.archiposition.com/', group: '灵感', desc: '深度建筑评论、展览与作品报道' },
@@ -243,6 +247,20 @@ export function addGroup(name: string): void {
   }
 }
 
+/** 调整自定义分组顺序；「全部」「默认」始终固定在顶部。 */
+export function moveGroup(name: string, targetName: string, after: boolean): boolean {
+  if (name === targetName || name === '全部' || name === '默认' ||
+      targetName === '全部' || targetName === '默认') return false
+  const groups = getGroups()
+  const from = groups.indexOf(name)
+  if (from === -1 || !groups.includes(targetName)) return false
+  const [moved] = groups.splice(from, 1)
+  groups.splice(groups.indexOf(targetName) + (after ? 1 : 0), 0, moved)
+  if (!writeLS(LS_GROUPS, JSON.stringify(groups))) return false
+  void syncToDisk()
+  return true
+}
+
 /** 重命名分组；同步更新该分组下所有链接的 group 字段 */
 export function renameGroup(oldName: string, newName: string): boolean {
   const name = newName.trim()
@@ -271,9 +289,10 @@ export function getLinks(): LinkItem[] {
   return readLS<LinkItem[]>(LS_LINKS, [])
 }
 
-function setLinks(items: LinkItem[]): void {
-  writeLS(LS_LINKS, JSON.stringify(items))
+function setLinks(items: LinkItem[]): boolean {
+  if (!writeLS(LS_LINKS, JSON.stringify(items))) return false
   void syncToDisk()
+  return true
 }
 
 /** 添加链接；校验 URL 合法性与重复 */
@@ -305,7 +324,7 @@ export function addLink(
     group,
     ts: Date.now()
   })
-  setLinks(items)
+  if (!setLinks(items)) return { ok: false, msg: t('links.add.storageFail') }
   return { ok: true, msg: t('links.add.success'), id }
 }
 
@@ -427,6 +446,20 @@ export interface PromptItem {
 }
 
 const LS_PROMPTS = 'musy.prompts'
+const LS_PROMPT_EXAMPLES = 'musy.promptExamplesV1'
+
+/** Only initialize an untouched library. Deleted demos and imported empty libraries stay empty. */
+export function seedPromptExamples(): void {
+  if (localStorage.getItem(LS_PROMPT_EXAMPLES)) return
+  if (localStorage.getItem(LS_PROMPTS) !== null) {
+    writeLS(LS_PROMPT_EXAMPLES, '1')
+    return
+  }
+  if (writeLS(LS_PROMPTS, JSON.stringify(PROMPT_EXAMPLES))) {
+    writeLS(LS_PROMPT_EXAMPLES, '1')
+    void syncToDisk()
+  }
+}
 
 /** 是否已完成层级修正（每次启动只做一次） */
 let treeNormalized = false
@@ -510,6 +543,21 @@ export function addPrompt(p: {
   })
   // 写入失败时返回空 id，调用方可据此提示用户（成功时一定是非空 id）
   return setPrompts(items) ? id : ''
+}
+
+/** 一次写入多条导入结果，避免中途配额失败造成只导入一部分。 */
+export function addPromptsBatch(entries: Pick<PromptItem, 'text' | 'tags' | 'image' | 'note'>[]): boolean {
+  if (!entries.length) return false
+  const now = Date.now()
+  const imported = entries.map((entry, index): PromptItem => ({
+    id: `${now}-${index}-${Math.random().toString(36).slice(2, 8)}`,
+    text: entry.text,
+    tags: entry.tags,
+    image: entry.image,
+    note: entry.note,
+    ts: now + index
+  }))
+  return setPrompts([...imported, ...getPrompts()])
 }
 
 /** 删除提示词（级联删除其子提示词） */

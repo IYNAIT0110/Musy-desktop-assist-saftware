@@ -1,5 +1,6 @@
 import { BrowserWindow, screen, shell, app } from 'electron'
 import { join } from 'path'
+import { floatSize } from '../../shared/floatLayout'
 
 let floatBarWindow: BrowserWindow | null = null
 
@@ -14,10 +15,9 @@ export function createFloatBarWindow(): BrowserWindow {
   }
 
   const { workArea } = screen.getPrimaryDisplay()
-  // 悬浮条尺寸：初始为最小球 64×64
-  // 定位在屏幕左侧垂直居中偏上，给向右（760px）与向下（560px）的展开预留空间
-  const barWidth = 64
-  const barHeight = 64
+  // 可见小球仍为 64×64，启动时就预留透明动画画布，展开时不再改变纵向位置。
+  // 定位在屏幕左侧垂直居中偏上，给向右（760px）与向下（680px）的展开预留空间
+  const { w: barWidth, h: barHeight } = floatSize(1, workArea.height)
   const barX = workArea.x + 16
   const barY = workArea.y + Math.round((workArea.height - barHeight) / 2) - 80
 

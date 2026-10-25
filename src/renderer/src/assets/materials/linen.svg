@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <g stroke-width="1" opacity=".45"><path stroke="#fff" d="M1 0v24M7 0v24M13 0v24M19 0v24M0 1h24M0 7h24M0 13h24M0 19h24"/><path stroke="#000" d="M3 0v24M9 0v24M15 0v24M21 0v24M0 3h24M0 9h24M0 15h24M0 21h24"/></g>
+  <g fill="#fff" opacity=".18"><path d="M0 0h2v2H0zm12 0h2v2h-2zM6 6h2v2H6zm12 0h2v2h-2zM0 12h2v2H0zm12 0h2v2h-2zM6 18h2v2H6zm12 0h2v2h-2z"/></g>
+</svg>

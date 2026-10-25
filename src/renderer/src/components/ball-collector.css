@@ -1,0 +1,11 @@
+.mascot-ball.collecting { border-radius:50%; box-shadow:0 0 0 2px var(--accent-tint),0 0 16px var(--accent-tint-soft); }
+.ball-collector-bubble { position:absolute; top:4px; width:max-content; min-width:180px; max-width:calc(100% - 72px); height:56px; display:flex; align-items:center; gap:8px; padding:7px 10px; background:var(--bubble-bg); border:1px solid var(--border-hover); border-radius:14px; color:var(--text-primary); z-index:20; box-shadow:0 6px 24px rgb(0 0 0 / .18); cursor:default; }
+.ball-collector-bubble>svg { color:var(--accent-tint); flex-shrink:0; }
+.ball-collector-bubble.phase-hover { border-color:var(--accent-tint); }
+.ball-collector-copy { flex:1; min-width:0; display:flex; flex-direction:column; gap:3px; }
+.ball-collector-copy strong { font-size:14px; line-height:19px; font-weight:600; white-space:nowrap; }
+.ball-collector-copy span { font-size:12px; line-height:17px; color:var(--text-secondary); white-space:nowrap; text-overflow:ellipsis; overflow:hidden; }
+.ball-collector-bubble button { border:1px solid var(--border); background:var(--bg-input); border-radius:8px; min-height:30px; padding:4px 7px; font:inherit; font-size:11px; white-space:nowrap; color:var(--text-primary); cursor:pointer; flex-shrink:0; }
+.ball-collector-bubble button:hover { background:var(--bg-hover); }
+.ball-collector-bubble button:focus-visible { outline:2px solid var(--accent-tint); outline-offset:2px; }
+.ball-collector-bubble button.ball-collector-close { border:0; background:transparent; min-width:20px; padding:0; font-size:16px; color:var(--text-secondary); }

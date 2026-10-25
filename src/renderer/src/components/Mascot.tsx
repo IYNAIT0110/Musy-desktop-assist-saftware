@@ -9,7 +9,7 @@ interface MascotProps {
    *       surprised / curious / suspicious / confused / angry / sad /
    *       laughing / scared / proud / shy / playful / celebrate / drowsy / sleeping
    */
-  mood?: GrokState | 'focus'
+  mood?: GrokState | 'focus' | 'ambient'
   floating?: boolean
   /**
    * circle: 悬浮条上把眼睛直接放在胶囊顶部（无独立球体底），
@@ -19,7 +19,7 @@ interface MascotProps {
 }
 
 // 原版 GrokBot 配色（移植自 LaoA-GrokBot）
-const EYE = '#fffdf7'
+const EYE = 'var(--mascot-eye)'
 
 // 全部 39 种原版状态名（POOLS 键）
 type GrokState =
@@ -43,6 +43,9 @@ export const ALL_STATES: GrokState[] = [
 ]
 
 export type { GrokState }
+
+// 39 个状态共用 25 种眼睛形状。日常轮换直接遍历形状，避免反复抽到同一状态首帧。
+const AMBIENT_EXPRESSIONS = DATA.EXPRESSIONS.map((_, index) => index)
 
 // 情绪 → 原版状态名（POOLS 键），保留常用别名映射
 const MOOD_TO_STATE: Record<string, GrokState> = {
@@ -111,9 +114,16 @@ export function Mascot({
     if (!eyeEls[0] || !eyeEls[1]) return
 
     // === 状态初始化（复用原版引擎变量） ===
-    let stateName = (MOOD_TO_STATE[moodRef.current] ?? (moodRef.current as GrokState)) || 'idle'
-    let pool: number[] = DATA.POOLS[stateName] ?? [0]
-    let expression = pool[0]
+    const resolveState = (): GrokState | 'ambient' =>
+      moodRef.current === 'ambient'
+        ? 'ambient'
+        : (MOOD_TO_STATE[moodRef.current] ?? moodRef.current) as GrokState
+    const poolFor = (state: GrokState | 'ambient'): number[] =>
+      state === 'ambient' ? AMBIENT_EXPRESSIONS : DATA.POOLS[state] ?? [0]
+    let stateName = resolveState()
+    let pool = poolFor(stateName)
+    let expression = pool[Math.floor(Math.random() * pool.length)]
+    let remaining = pool.filter((index) => index !== expression)
     let current = DATA.EXPRESSIONS[expression].map((r) => r.map((p) => [...p]))
     let target = DATA.EXPRESSIONS[expression]
     let morph = 1
@@ -125,7 +135,15 @@ export function Mascot({
     let targetTurn = 0 // 目标水平旋转角
     let targetGazeY = 0 // 目标垂直视线
     let stateTimer: ReturnType<typeof setTimeout> | null = null
+    let blinkTimer: ReturnType<typeof setTimeout> | null = null
     let raf = 0
+
+    const takeExpression = (): number => {
+      if (remaining.length === 0) remaining = pool.filter((index) => index !== expression)
+      if (remaining.length === 0) return expression
+      const at = Math.floor(Math.random() * remaining.length)
+      return remaining.splice(at, 1)[0]
+    }
 
     const chooseExpression = (index: number): void => {
       current = current.map((ring, e) =>
@@ -158,15 +176,24 @@ export function Mascot({
     // 状态内表情池轮换（按原版 EXPR_CADENCE 节奏）
     const scheduleNext = (): void => {
       if (stateTimer) clearTimeout(stateTimer)
-      const cadence = DATA.EXPR_CADENCE[stateName]
+      const cadence = stateName === 'ambient' ? [3000, 5000] : DATA.EXPR_CADENCE[stateName]
       if (cadence && pool.length > 1) {
         const [min, max] = cadence
         stateTimer = setTimeout(() => {
-          const choice = pool[Math.floor(Math.random() * pool.length)]
-          chooseExpression(choice)
+          chooseExpression(takeExpression())
           scheduleNext()
         }, min + Math.random() * (max - min))
       }
+    }
+
+    const scheduleBlink = (): void => {
+      if (blinkTimer) clearTimeout(blinkTimer)
+      const range = stateName === 'ambient' ? DATA.BLINK.idle : DATA.BLINK[stateName]
+      if (!range) return
+      blinkTimer = setTimeout(() => {
+        blink()
+        scheduleBlink()
+      }, range[0] + Math.random() * (range[1] - range[0]))
     }
 
     // === 核心渲染循环：球面透视投影（原版 frame()） ===
@@ -175,13 +202,14 @@ export function Mascot({
       last = now
 
       // 检测 mood 变化：平滑 morph 到新状态的表情（而非引擎重建硬切）
-      const nextState = (MOOD_TO_STATE[moodRef.current] ?? (moodRef.current as GrokState)) || 'idle'
+      const nextState = resolveState()
       if (nextState !== stateName) {
         stateName = nextState
-        pool = DATA.POOLS[stateName] ?? [0]
-        // 切到新状态：选池内第一个表情，走弹簧 morph 平滑过渡
-        chooseExpression(pool[0])
+        pool = poolFor(stateName)
+        remaining = []
+        chooseExpression(takeExpression())
         scheduleNext()
+        scheduleBlink()
       }
 
       // 弹簧变形积分（临界阻尼弹簧，稍放缓让表情衔接更柔和）
@@ -272,18 +300,8 @@ export function Mascot({
     }
     window.addEventListener('pointerdown', onPointerDown)
 
-    // 随机眨眼（按原版 BLINK 节奏）
-    let blinkTimer: ReturnType<typeof setTimeout>
-    const blinkLoop = (): void => {
-      const range = DATA.BLINK[stateName]
-      if (range) {
-        blinkTimer = setTimeout(() => {
-          blink()
-          blinkLoop()
-        }, range[0] + Math.random() * (range[1] - range[0]))
-      }
-    }
-    blinkLoop()
+    // 随机眨眼（按原版 BLINK 节奏）；状态变化时重新安排计时。
+    scheduleBlink()
 
     // 启动
     scheduleNext()
@@ -321,7 +339,7 @@ export function Mascot({
 
         {/* 身体（纯黑球体，无高光）。悬浮条上 circle=false 时不渲染，只留眼睛 */}
         {circle && (
-          <path className="mascot-body" d={BODY_PATH} fill="#000000" />
+          <path className="mascot-body" d={BODY_PATH} fill="var(--mascot-color)" />
         )}
 
         {/* 眼睛（白色实心多边形，裁剪在球体内，球面透视驱动） */}

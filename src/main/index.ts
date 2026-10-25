@@ -1,3 +1,5 @@
+import { floatInsets, floatSize, floatGutterContains, reframeFloatBounds } from '../shared/floatLayout'
+import { translateMessage, validLocale } from '../shared/uiMessages'
 import { app, shell, BrowserWindow, ipcMain, screen, clipboard, dialog } from 'electron'
 import { createMainWindow } from './windows/mainWindow'
 import { createFloatBarWindow, getFloatBarWindow } from './windows/floatBar'
@@ -5,6 +7,8 @@ import { writeFile, readFile, mkdir, rm, rename } from 'fs/promises'
 import { createHash } from 'crypto'
 import { existsSync } from 'fs'
 import { join } from 'path'
+import { registerTreasureIpc } from './treasureIpc'
+import { analyzePromptFile } from './promptImport'
 
 // 悬浮条形态切换动画的定时器（全局唯一，避免连续切换时多个动画并存互相打架）
 let levelAnimTimer: NodeJS.Timeout | null = null
@@ -28,6 +32,7 @@ if (!gotTheLock) {
 
 function bootstrap(): void {
   app.setAppUserModelId('com.musy.desktop-assist')
+  registerTreasureIpc()
 
   // 创建迷你悬浮条
   createFloatBarWindow()
@@ -54,13 +59,78 @@ function bootstrap(): void {
   // 读取系统剪贴板文本（一键收藏剪贴板链接用）
   ipcMain.handle('clipboard:read-text', () => clipboard.readText())
 
+  // 只识别完整的 http/https 网址，不访问网页或发起网络请求。
+  const clipboardUrl = (text: string): string | null => {
+    const url = text.trim()
+    if (url.length > 2048 || !/^https?:\/\/\S+$/i.test(url)) return null
+    try {
+      const parsed = new URL(url)
+      return parsed.username || parsed.password || !parsed.hostname ? null : parsed.href
+    } catch { return null }
+  }
+  let lastClipboardText = ''
+  let clipboardWatchEnabled = false
+  ipcMain.handle('clipboard:set-link-watch', (_e, enabled: boolean) => {
+    clipboardWatchEnabled = enabled === true
+    if (!clipboardWatchEnabled) return null
+    try {
+      lastClipboardText = clipboard.readText()
+      return clipboardUrl(lastClipboardText)
+    } catch { return null /* 剪贴板暂时被其它程序占用 */ }
+  })
+  const clipboardTimer = setInterval(() => {
+    if (!clipboardWatchEnabled) return
+    let current: string
+    try { current = clipboard.readText() } catch { return }
+    if (current === lastClipboardText) return
+    lastClipboardText = current
+    const url = clipboardUrl(current)
+    if (!url) return
+    const bar = getFloatBarWindow()
+    if (bar && !bar.isDestroyed() && bar.isVisible() && !bar.isMinimized()) {
+      bar.webContents.send('clipboard:new-url', url)
+    }
+  }, 1200)
+  clipboardTimer.unref?.()
+
+  let currentFloatInsets = floatInsets(1)
+  let floatPointerHeld = false
+  let gutterMousePassthrough = false
+  const bubbleWidth = 345
+  let bubbleSide: 'left' | 'right' | null = null
+  const hideLinkBubble = (): void => {
+    const bar = getFloatBarWindow()
+    if (!bubbleSide || !bar || bar.isDestroyed()) return
+    const bounds = bar.getBounds()
+    const ballX = bubbleSide === 'left' ? bounds.x + bounds.width - 64 : bounds.x
+    bar.setBounds({ x: ballX, y: bounds.y, width: 64, height: bounds.height })
+    bubbleSide = null
+  }
+  ipcMain.handle('floatbar:show-link-bubble', () => {
+    const bar = getFloatBarWindow()
+    // 首次渲染发生在 ready-to-show 之前；允许此时预先调整尺寸，避免启动时的链接被漏掉。
+    if (!bar || bar.isDestroyed() || bar.isMinimized()) return null
+    if (bubbleSide) return bubbleSide
+    const bounds = bar.getBounds()
+    if (bounds.width !== 64 || bounds.height !== floatSize(1, screen.getDisplayMatching(bounds).workArea.height).h) return null
+    const { workArea } = screen.getDisplayMatching(bounds)
+    const side = bounds.x + bubbleWidth <= workArea.x + workArea.width ? 'right' : 'left'
+    const x = side === 'left' ? bounds.x - (bubbleWidth - 64) : bounds.x
+    if (x < workArea.x || x + bubbleWidth > workArea.x + workArea.width) return null
+    bar.setBounds({ x, y: bounds.y, width: bubbleWidth, height: bounds.height })
+    bubbleSide = side
+    return side
+  })
+  ipcMain.handle('floatbar:hide-link-bubble', () => hideLinkBubble())
+
   // 选择本地数据保存文件夹
   // 起始目录用系统「文档」目录：不能硬编码 D:\\，否则没有 D 盘的机器上对话框起始路径失效
-  ipcMain.handle('data:choose-folder', async () => {
+  ipcMain.handle('data:choose-folder', async (_event, locale: unknown) => {
+    const lt = (message: string): string => translateMessage(message, validLocale(locale))
     try {
       // 不挂父窗口：悬浮球是 alwaysOnTop 无边框小窗，挂上面系统对话框可能弹不出/被遮挡
       const res = await dialog.showOpenDialog({
-        title: '选择数据保存文件夹',
+        title: lt('选择数据保存文件夹'),
         defaultPath: app.getPath('documents'),
         properties: ['openDirectory', 'createDirectory']
       })
@@ -73,13 +143,14 @@ function bootstrap(): void {
   })
 
   // 选择本地语言包 JSON 文件并读取内容（自定义语言包）
-  ipcMain.handle('language:pick-file', async () => {
+  ipcMain.handle('language:pick-file', async (_event, locale: unknown) => {
+    const lt = (message: string): string => translateMessage(message, validLocale(locale))
     try {
       const res = await dialog.showOpenDialog({
-        title: '选择语言包文件（JSON）',
+        title: lt('选择语言包文件（JSON）'),
         defaultPath: app.getPath('documents'),
         properties: ['openFile'],
-        filters: [{ name: 'JSON 语言包', extensions: ['json'] }]
+        filters: [{ name: lt('JSON 语言包'), extensions: ['json'] }]
       })
       if (res.canceled || res.filePaths.length === 0) return null
       try {
@@ -94,15 +165,30 @@ function bootstrap(): void {
     }
   })
 
-  ipcMain.handle('data:pick-backup', async () => {
+  ipcMain.handle('data:pick-backup', async (_event, locale: unknown) => {
+    const lt = (message: string): string => translateMessage(message, validLocale(locale))
     const res = await dialog.showOpenDialog({
-      title: '导入 Musy 数据备份',
+      title: lt('导入 Musy 数据备份'),
       defaultPath: app.getPath('documents'),
       properties: ['openFile'],
-      filters: [{ name: 'Musy JSON 备份', extensions: ['json'] }]
+      filters: [{ name: lt('Musy JSON 备份'), extensions: ['json'] }]
     })
     if (res.canceled || !res.filePaths[0]) return null
     return readFile(res.filePaths[0], 'utf-8')
+  })
+
+  ipcMain.handle('prompts:import-file', async (_e, cfg: { baseUrl: string; apiKey: string; model: string }, existingTags: string[], locale: unknown) => {
+    const lt = (message: string): string => translateMessage(message, validLocale(locale))
+    const res = await dialog.showOpenDialog({
+      title: lt('导入提示词文件'),
+      defaultPath: app.getPath('documents'),
+      properties: ['openFile'],
+      filters: [
+        { name: lt('提示词文档'), extensions: ['docx', 'pdf', 'txt', 'md', 'markdown', 'html', 'htm', 'csv', 'json', 'rtf'] }
+      ]
+    })
+    if (res.canceled || !res.filePaths[0]) return null
+    return analyzePromptFile(res.filePaths[0], cfg, Array.isArray(existingTags) ? existingTags : [])
   })
 
   // 把全部数据（JSON）写入指定文件夹
@@ -401,6 +487,11 @@ function bootstrap(): void {
   )
 
   // 悬浮条拖拽移动
+  ipcMain.on('floatbar:pointer-held', (event, held: unknown) => {
+    const bar = getFloatBarWindow()
+    if (bar && !bar.isDestroyed() && event.sender.id === bar.webContents.id) floatPointerHeld = held === true
+  })
+
   ipcMain.handle('floatbar:move', (_e, deltaX: number, deltaY: number) => {
     const bar = getFloatBarWindow()
     if (!bar || bar.isDestroyed()) return
@@ -409,42 +500,23 @@ function bootstrap(): void {
   })
 
   // 悬浮条三级形态：
-  // L1 最小球 64×64 → L2 功能胶囊 320×64 → L3 完整面板 760×560
-  // 左边缘 + 顶部锚定：向右加宽（出现标题栏）、向下加高展开面板，球体位置不动
+  // 内容尺寸与动画留白分开计算；L1/L2 共用纵向画布，剪贴板气泡保留该高度。
+  // 按可见工具栏顶部锚定，额外透明区域用于绘制 Gooey Nav 粒子。
   // L3 展开顺序：先向右加宽，再向下展开功能面板；收起反之
   ipcMain.handle('floatbar:set-level', (_e, level: number) => {
     const bar = getFloatBarWindow()
     if (!bar || bar.isDestroyed()) return
-    const sizes: Record<number, { w: number; h: number }> = {
-      1: { w: 64, h: 64 },
-      2: { w: 296, h: 64 }, // 球59 + 胶囊内容234，完整容纳 5 图标
-      3: { w: 760, h: 560 },
-      4: { w: 760, h: 980 } // L4：提示词工作区（L3 面板 + 下方母子提示词区）
-    }
-    // 小屏钳制：L4 高度不超过工作区可用高度（留 12px 余量）
-    if (level === 4) {
-      const { workArea } = screen.getPrimaryDisplay()
-      const maxH = workArea.height - 12
-      if (maxH < sizes[4].h) sizes[4] = { w: 760, h: Math.max(560, maxH) }
-    }
-    const target = sizes[level] ?? sizes[1]
-    const bounds = bar.getBounds()
-    let x = bounds.x
-    let y = bounds.y
-    const startW = bounds.width
-    const startH = bounds.height
+    hideLinkBubble()
+    const previous = bar.getBounds()
+    const { workArea } = screen.getDisplayMatching(previous)
+    const nextInsets = floatInsets([1, 2, 3, 4].includes(level) ? level : 1)
+    const target = floatSize(level, workArea.height)
+    const { x, y, width: startW, height: startH } = reframeFloatBounds(previous, currentFloatInsets, nextInsets, target, workArea)
+    if (levelAnimTimer) { clearInterval(levelAnimTimer); levelAnimTimer = null }
+    currentFloatInsets = nextInsets
+    if (gutterMousePassthrough) { bar.setIgnoreMouseEvents(false); gutterMousePassthrough = false }
+    bar.setBounds({ x, y, width: startW, height: startH })
     if (Math.abs(startW - target.w) < 1 && Math.abs(startH - target.h) < 1) return
-
-    // 展开越界钳制：向右/向下扩展时若超出工作区，则向左/向上回退，保证面板完整可见
-    if (target.w > startW || target.h > startH) {
-      const { workArea } = screen.getPrimaryDisplay()
-      if (x + target.w > workArea.x + workArea.width) {
-        x = workArea.x + workArea.width - target.w
-      }
-      if (y + target.h > workArea.y + workArea.height) {
-        y = workArea.y + workArea.height - target.h
-      }
-    }
 
     // 分步序列：展开时先宽后高；收起时先高后宽
     const seq: { w: number; h: number; dur: number }[] = []
@@ -520,6 +592,11 @@ function bootstrap(): void {
     const bar = getFloatBarWindow()
     if (!bar || bar.isDestroyed()) return
     const point = screen.getCursorScreenPoint()
+    const passthrough = !floatPointerHeld && floatGutterContains(bar.getBounds(), currentFloatInsets, point)
+    if (passthrough !== gutterMousePassthrough) {
+      bar.setIgnoreMouseEvents(passthrough, { forward: true })
+      gutterMousePassthrough = passthrough
+    }
     bar.webContents.send('cursor:global', { x: point.x, y: point.y })
   }, 16)
   cursorTimer.unref?.()

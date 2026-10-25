@@ -1,3 +1,4 @@
+import { InteractiveButton } from './HoverFeedback'
 import { useState } from 'react'
 import { getDataFolder, importBackup, setDataFolder } from '../store'
 import { t, useLang } from '../i18n'
@@ -72,7 +73,7 @@ export function PathSettings({ onClose }: { onClose: () => void }): JSX.Element 
           <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
             {t('path.title')}
           </div>
-          <button
+          <InteractiveButton
             onClick={onClose}
             title={t('settings.close')}
             style={{
@@ -92,7 +93,7 @@ export function PathSettings({ onClose }: { onClose: () => void }): JSX.Element 
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
-          </button>
+          </InteractiveButton>
         </div>
         <PathSettingsBody />
       </div>
@@ -167,7 +168,7 @@ export function PathSettingsBody(): JSX.Element {
             spellCheck={false}
             style={inputStyle}
           />
-          <button
+          <InteractiveButton
             onClick={() => void browse()}
             title={t('path.browse')}
             className="pressable"
@@ -191,7 +192,7 @@ export function PathSettingsBody(): JSX.Element {
               <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
             </svg>
             {t('path.browse')}
-          </button>
+          </InteractiveButton>
         </div>
       </div>
 
@@ -213,7 +214,7 @@ export function PathSettingsBody(): JSX.Element {
       )}
 
       {/* 保存 */}
-      <button
+      <InteractiveButton
         onClick={save}
         className="pressable"
         style={{
@@ -229,13 +230,13 @@ export function PathSettingsBody(): JSX.Element {
         }}
       >
         {saved ? t('path.saved') : t('path.save')}
-      </button>
-      <button onClick={() => void restore()} className="pressable" style={{
+      </InteractiveButton>
+      <InteractiveButton onClick={() => void restore()} className="pressable" style={{
         height: 36, borderRadius: 'var(--radius-full)', border: '1px solid var(--border)',
         background: 'var(--bg-input)', color: 'var(--text-primary)', cursor: 'pointer'
       }}>
         {t('path.import')}
-      </button>
+      </InteractiveButton>
       {importError && <div role="alert" style={{ color: '#ff6b6b', fontSize: 12 }}>{t('path.importError')}</div>}
     </div>
   )

@@ -1,0 +1,223 @@
+// 真实临时目录中的持久化测试，不读取或修改用户资料库。
+const { test } = require('node:test')
+const assert = require('node:assert/strict')
+const fs = require('node:fs/promises')
+const { readFileSync } = require('node:fs')
+const path = require('node:path')
+const os = require('node:os')
+const { randomUUID } = require('node:crypto')
+const Module = require('node:module')
+const ts = require('typescript')
+const source = path.resolve(__dirname, '../src/main/treasureStore.ts')
+const loaded = new Module(source, module)
+loaded.filename = source
+loaded.paths = Module._nodeModulePaths(path.dirname(source))
+loaded._compile(ts.transpileModule(readFileSync(source, 'utf8'), { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } }).outputText, source)
+const { TreasureStore, validateCatalog, atomicJson } = loaded.exports
+
+async function fixture(t) {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'musy-treasure-test-'))
+  t.after(async () => {
+    const target = path.resolve(directory)
+    const parent = path.resolve(os.tmpdir())
+    assert.equal(path.dirname(target).toLowerCase(), parent.toLowerCase())
+    assert.ok(path.basename(target).startsWith('musy-treasure-test-'))
+    await fs.rm(target, { recursive: true, force: true })
+  })
+  const originals = path.join(directory, '项目 文件')
+  const library = path.join(directory, '库')
+  await fs.mkdir(path.join(originals, '贴图'), { recursive: true })
+  await fs.writeFile(path.join(originals, '椅子.skp'), 'original-model')
+  await fs.writeFile(path.join(originals, '贴图', '木纹.png'), 'image-placeholder')
+  const store = new TreasureStore(library)
+  await store.load(true)
+  return { directory, originals, library, store }
+}
+async function imported(f) { await f.store.startImport([f.originals]); await f.store.waitForImport(); return (await f.store.query({})).items }
+
+test('引用导入、重复路径、分类搜索、回收恢复和重启持久化', async t => {
+  const f = await fixture(t)
+  const items = await imported(f)
+  assert.equal(items.length, 2)
+  assert.ok(items.every(a => a.available && a.storageMode === 'reference'))
+  assert.equal(await fs.readFile(path.join(f.originals, '椅子.skp'), 'utf8'), 'original-model')
+  await f.store.startImport([f.originals]); await f.store.waitForImport()
+  assert.equal(f.store.status().job.duplicates, 2)
+  await f.store.group('add', '家具')
+  const groupId = f.store.status().groups.find(g => g.name === '家具').id
+  const model = items.find(a => a.ext === 'skp')
+  await f.store.update([model.id], { name: '座椅', tags: ['木质'], note: '会议室方案', groupId })
+  assert.equal((await f.store.query({ text: '会议室', groupId })).total, 1)
+  assert.equal((await f.store.query({ tag: '木质' })).total, 1)
+  assert.equal((await f.store.query({ tag: '木' })).total, 0)
+  await f.store.remove([model.id])
+  assert.equal((await f.store.query({})).total, 1)
+  assert.equal((await f.store.query({ trash: true })).total, 1)
+  await f.store.remove([model.id], true)
+  const restarted = new TreasureStore(f.library); await restarted.load()
+  assert.equal((await restarted.query({ text: '木质' })).items[0].name, '座椅')
+  await restarted.group('delete', '', groupId)
+  assert.equal(restarted.item(model.id).groupId, '')
+})
+
+test('文件夹仅按导入根目录归组、同名复用、跨批次和重启后保留', async t => {
+  const f = await fixture(t)
+  await f.store.group('add', '项目 文件')
+  const rootGroup = f.store.status().groups.find(g => g.name === '项目 文件').id
+  const nested = path.join(f.originals, '另一方案', '贴图')
+  await fs.mkdir(nested, { recursive: true })
+  await fs.mkdir(path.join(f.originals, '空目录'))
+  await Promise.all(Array.from({ length: 28 }, (_, i) => fs.writeFile(path.join(nested, `纹理${i}.png`), 'texture')))
+  await imported(f)
+  assert.equal(f.store.status().count, 30)
+  assert.deepEqual(f.store.status().groups.map(g => g.name), ['项目 文件'])
+  const all = (await f.store.query({})).items
+  assert.equal(all.find(a => a.ext === 'skp').groupId, f.store.status().groups.find(g => g.name === '项目 文件').id)
+  assert.ok(all.every(a => a.groupId === rootGroup))
+  await f.store.startImport([f.originals]); await f.store.waitForImport()
+  assert.equal(f.store.status().job.duplicates, 30)
+  assert.equal(f.store.status().groups.length, 1)
+  const restarted = new TreasureStore(f.library); await restarted.load()
+  assert.equal((await restarted.query({ groupId: rootGroup })).total, 30)
+})
+
+test('旧版最近一次目录导入的子分组合并至根目录，保留其他手动分组', async t => {
+  const f = await fixture(t)
+  const items = await imported(f)
+  await f.store.group('add', '贴图')
+  await f.store.group('add', '自建收藏')
+  const child = f.store.status().groups.find(g => g.name === '贴图').id
+  const manual = f.store.status().groups.find(g => g.name === '自建收藏').id
+  const image = items.find(a => a.ext === 'png'); const model = items.find(a => a.ext === 'skp')
+  await f.store.update([image.id], { groupId: child })
+  await f.store.update([model.id], { groupId: manual })
+  await f.store.change(c => { delete c.folderGrouping })
+  const restarted = new TreasureStore(f.library); await restarted.load()
+  const root = restarted.status().groups.find(g => g.name === '项目 文件').id
+  assert.equal(restarted.item(image.id).groupId, root)
+  assert.equal(restarted.item(model.id).groupId, manual)
+  assert.ok(!restarted.status().groups.some(g => g.id === child))
+  assert.equal(restarted.data.folderGrouping, 'root')
+  await restarted.update([image.id], { groupId: manual })
+  const again = new TreasureStore(f.library); await again.load()
+  assert.equal(again.item(image.id).groupId, manual)
+})
+
+test('单文件导入保持未分组；重导文件夹补齐旧条目且保留手动分组和回收区', async t => {
+  const f = await fixture(t)
+  const modelPath = path.join(f.originals, '椅子.skp')
+  const imagePath = path.join(f.originals, '贴图', '木纹.png')
+  await f.store.startImport([modelPath, imagePath]); await f.store.waitForImport()
+  assert.equal(f.store.status().groups.length, 0)
+  assert.ok((await f.store.query({})).items.every(a => a.groupId === ''))
+  await f.store.startImport([f.originals]); await f.store.waitForImport()
+  assert.equal(f.store.status().count, 2)
+  assert.equal((await f.store.query({ groupId: 'ungrouped' })).total, 0)
+  const items = (await f.store.query({})).items
+  const model = items.find(a => a.ext === 'skp'); const image = items.find(a => a.ext === 'png')
+  await f.store.group('add', '手动整理')
+  const manual = f.store.status().groups.find(g => g.name === '手动整理').id
+  await f.store.update([model.id], { groupId: manual })
+  await f.store.update([image.id], { groupId: '' })
+  await f.store.remove([image.id])
+  await f.store.startImport([f.originals]); await f.store.waitForImport()
+  assert.equal(f.store.item(model.id).groupId, manual)
+  assert.equal(f.store.item(image.id).groupId, '')
+  assert.equal(f.store.status().trashCount, 1)
+  assert.equal(f.store.status().job.imported, 0)
+})
+
+test('移动根目录、单文件重新定位和失效路径反馈', async t => {
+  const f = await fixture(t); const items = await imported(f)
+  const next = path.join(f.directory, '迁移后')
+  await fs.rename(f.originals, next)
+  assert.ok((await f.store.query({})).items.every(a => !a.available))
+  await f.store.relink(f.store.status().roots[0].id, next)
+  assert.ok((await f.store.query({})).items.every(a => a.available))
+  const model = items.find(a => a.ext === 'skp')
+  const relocated = path.join(f.directory, '新名字.skp')
+  await fs.rename(path.join(next, '椅子.skp'), relocated)
+  await f.store.locate(model.id, relocated)
+  assert.equal(f.store.path(f.store.item(model.id)), relocated)
+  assert.equal(await fs.readFile(relocated, 'utf8'), 'original-model')
+})
+
+test('取消、失败明细和重启时的中断任务可重试', async t => {
+  const f = await fixture(t)
+  await f.store.startImport([f.originals]); f.store.cancel(); await f.store.waitForImport()
+  assert.equal(f.store.status().job.state, 'canceled')
+  await f.store.startImport([f.originals, path.join(f.directory, '不存在')]); await f.store.waitForImport()
+  assert.equal(f.store.status().job.failed, 1)
+  assert.equal(f.store.status().job.imported, 2)
+  await f.store.change(c => { c.job.state = 'running' })
+  const restarted = new TreasureStore(f.library); await restarted.load()
+  assert.equal(restarted.status().job.state, 'interrupted')
+  await restarted.startImport([f.originals]); await restarted.waitForImport()
+  assert.equal(restarted.status().job.duplicates, 2)
+})
+
+test('备份包含自有封面、恢复前留存完整恢复点、损坏备份不覆盖', async t => {
+  const f = await fixture(t); const items = await imported(f)
+  const coverName = randomUUID() + '.png'
+  const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a3ioAAAAASUVORK5CYII=', 'base64')
+  await fs.writeFile(path.join(f.library, 'covers', coverName), png)
+  await f.store.cover(items[0].id, coverName)
+  const backup = await f.store.exportBackup()
+  assert.equal(backup.catalog.items.length, 2)
+  assert.ok(backup.covers[coverName])
+  assert.equal(backup.originals, undefined)
+  const target = new TreasureStore(path.join(f.directory, '第二个库')); await target.load(true)
+  await target.restoreBackup(structuredClone(backup))
+  assert.equal(target.status().count, 2)
+  assert.deepEqual(await fs.readFile(path.join(target.directory, 'covers', target.item(items[0].id).cover)), png)
+  assert.equal((await fs.readdir(path.join(target.directory, 'recovery'))).length, 1)
+  const broken = structuredClone(backup); broken.catalog.items[0].relativePath = '../escape.skp'
+  await assert.rejects(() => target.restoreBackup(broken))
+  assert.equal(target.status().count, 2)
+  const missingCover = structuredClone(backup); missingCover.covers = {}
+  await assert.rejects(() => target.restoreBackup(missingCover))
+  assert.equal(target.status().count, 2)
+})
+
+test('损坏索引用有效快照恢复，损坏快照不会被当成空库', async t => {
+  const f = await fixture(t); await imported(f)
+  await f.store.group('add', '恢复前')
+  await fs.writeFile(path.join(f.library, 'catalog.json'), '{broken')
+  const restarted = new TreasureStore(f.library); await restarted.load()
+  assert.equal(restarted.status().count, 2)
+  assert.ok(restarted.status().recovery)
+  assert.ok((await fs.readdir(f.library)).some(name => name.includes('.damaged-')))
+  const bad = path.join(f.directory, '只有损坏快照')
+  await fs.mkdir(bad)
+  await fs.writeFile(path.join(bad, 'catalog.json.previous'), '{broken')
+  await assert.rejects(() => new TreasureStore(bad).load(true))
+  await assert.rejects(() => fs.stat(path.join(bad, 'catalog.json')))
+})
+
+test('写盘失败不污染内存，失败后队列仍可写入', async t => {
+  const f = await fixture(t); const items = await imported(f)
+  const index = path.join(f.library, 'catalog.json')
+  const parked = path.join(f.library, 'parked.json')
+  await fs.rename(index, parked); await fs.mkdir(index)
+  await assert.rejects(() => f.store.update([items[0].id], { name: '不应保存' }))
+  assert.notEqual(f.store.item(items[0].id).name, '不应保存')
+  await fs.rmdir(index); await fs.rename(parked, index)
+  await f.store.update([items[0].id], { name: '恢复写入' })
+  assert.equal(f.store.item(items[0].id).name, '恢复写入')
+})
+
+test('5,000 条索引分页搜索，仅返回当前页；非法封面和重复 ID 被拒绝', async t => {
+  const f = await fixture(t); const items = await imported(f)
+  await f.store.change(c => { c.items = Array.from({ length: 5000 }, (_, i) => ({ ...items[0], id: randomUUID(), name: '素材 ' + i, relativePath: `文件${i}.skp`, note: i === 4999 ? '检索目标' : '' })) })
+  const page = await f.store.query({})
+  assert.equal(page.total, 5000); assert.equal(page.items.length, 60)
+  assert.equal((await f.store.query({ text: '检索目标' })).total, 1)
+  const bad = f.store.data; bad.items[0].cover = '../outside.png'
+  assert.throws(() => validateCatalog(bad))
+  const duplicate = f.store.data; duplicate.items[1].id = duplicate.items[0].id
+  assert.throws(() => validateCatalog(duplicate))
+  const extra = f.store.data; extra.unexpected = '不应进入索引'
+  assert.equal(validateCatalog(extra).unexpected, undefined)
+  const last = path.join(f.directory, '原子文件.json'); await atomicJson(last, { ok: true })
+  assert.deepEqual(JSON.parse(await fs.readFile(last, 'utf8')), { ok: true })
+})

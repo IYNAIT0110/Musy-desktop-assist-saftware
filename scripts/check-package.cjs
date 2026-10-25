@@ -1,0 +1,18 @@
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),asar=require('@electron/asar')
+const root=path.resolve(__dirname,'..'),archive=path.join(root,'dist/win-unpacked/resources/app.asar')
+assert.ok(fs.existsSync(archive),'Missing packaged app.asar')
+const files=asar.listPackage(archive).map(n=>n.replaceAll('\\','/').replace(/^\//,''))
+const read=file=>asar.extractFile(archive,path.normalize(file))
+for(const file of files){
+ assert.ok(!/^(?:\.scratch|tests|docs|examples|\.git|release[^/]*)(?:\/|$)/.test(file),'Development content in app: '+file)
+ assert.ok(!/(?:^|\/)(?:musy-data\.json|catalog\.json|treasure-settings\.json|\.env(?:\..*)?)$/.test(file),'Private runtime data in app: '+file)
+}
+const pkg=JSON.parse(read('package.json'))
+assert.equal(pkg.version,require('../package.json').version)
+for(const name of ['cad-preview-MIT.txt','react-bits-GooeyNav-LICENSE.txt','LaoA-GrokBot-MIT.txt'])assert.ok(files.includes('licenses/'+name),'Missing license '+name)
+const renderer=files.filter(n=>n.startsWith('out/renderer/assets/')&&n.endsWith('.js')).map(n=>read(n).toString('utf8')).join('\n')
+for(const marker of ['example-pavilion-day','example-pavilion-night','example-library','chatgpt.com','sanaa.co.jp'])assert.ok(renderer.includes(marker),'Missing built-in content: '+marker)
+const appCode=files.filter(n=>n.startsWith('out/')&&n.endsWith('.js')).map(n=>read(n).toString('utf8')).join('\n')
+assert.ok(!/[A-Za-z]:[\\/](?:Users[\\/]Administrator|Musy[\\/]Musy-desktop-assist-saftware)/i.test(appCode),'Development machine path in bundle')
+assert.ok(!/sk-(?:proj-)?[A-Za-z0-9_-]{24,}/.test(appCode),'Possible API credential in bundle')
+console.log('PASS: package version, 64-site/3-example markers, third-party notices and private-data exclusions')
