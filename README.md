@@ -1,109 +1,56 @@
-# <img src="build/icon.png" width="36" align="top" /> Musy · 桌面悬窗助手
+# STArra · 闪星
 
-> 开发策略已更新：公开 v0.2.0 保留，后续源码私有开发，日常修改不发布。未来公开仓库只接收经批准的软件产物和用户文档。见[开发与发布策略](docs/私有开发与公开下载.md)。
+**让创造，自有星图。**
 
-把网站、提示词和设计素材放在随手可及的地方。一个会看着光标的小球，陪你完成「收集 → 整理 → 预览 → 复用」。
+本地优先的 Windows 桌面创作伙伴，把灵感、提示词、素材、文档与项目放在随手可及的小球里。当前版本 **v0.2.3**。
 
-[![Windows](https://img.shields.io/badge/Windows-10%20%2F%2011%20x64-0078d6)](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/latest)
-[![Release](https://img.shields.io/github/v/release/IYNAIT0110/Musy-desktop-assist-saftware)](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/latest)
+**[下载 v0.2.3](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/tag/v0.2.3) · [使用指南](docs/使用指南.md) · [文档目录](docs/README.md) · [更新记录](CHANGELOG.md) · [问题反馈](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/issues)**
 
-**[下载安装](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/latest) · [使用指南](docs/使用指南.md) · [文档目录](docs/README.md) · [更新记录](CHANGELOG.md) · [问题反馈](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/issues)**
+## 八个入口
 
-## 七个小入口
-
-| 入口 | 用途 | v0.2.2 状态 |
+| 默认顺序 | 功能 | v0.2.3 能力 |
 | --- | --- | --- |
-| 传送门 | 收藏网站、分组、搜索、打开链接 | 可用；内置 64 个网站，复制网址时可收到收藏邀请 |
-| 卷轴 | 保存提示词、预览图和母子版本 | 可用；3 条原创示例，卡牌切换、编辑、复制、可选 AI 扩写与翻译 |
-| 秘籍 | SketchUp / Rhino / AutoCAD 快捷键速查 | 可用；234 条离线参考资料，支持搜索 |
-| 点睛笔 | 独立文字润色入口 | 规划中；当前显示占位说明 |
-| 百宝匣 | 收集、分类、预览与复用本地设计素材 | 引用原件、批量标签、剪贴板和拖放、轻预览、并排参考、拖出文件 |
-| 便签 | 快速记录、待办、分类文件夹与 AI 整理 | 自动保存、文件夹预览、专注书写、自定义提示词 / Skill |
-| 织梦台 | 项目管理和统一资料索引 | 多项目关联、自动收集、继续工作、类型与标签筛选、关系备份 |
+| 1 | 星砂 | 普通文本、待办、Markdown 编辑与导出、专注书写、可选 AI 优化；内置 14 篇使用文档与 3 篇演示 |
+| 2 | 织梦台 | 项目关联、统一索引、自动收集与继续工作 |
+| 3 | 卷轴 | 母子提示词、预览图、卡牌切换、复制与可选 AI 扩写/翻译 |
+| 4 | 百宝匣 | 文件夹与剪贴板导入、原件引用、标签分组、轻预览、并排参考、拖出原件 |
+| 5 | 传送门 | 收藏、分组和搜索网站，内置 64 个公开网址 |
+| 6 | 秘籍 | SketchUp、Rhino、AutoCAD 离线快捷键参考 |
+| 7 | 点睛笔 | 独立润色 UI 占位，尚未接入全局润色 |
+| 8 | 胶囊 | 原文件与应用记录统一备份，按项目/日期导出，换机恢复与路径重建 |
 
-不需要账号。收藏、整理和离线资料可以直接使用；打开网站、抓取图标和自行配置的 AI 服务需要网络。
+右键小球呼出 **星笺、星轨、星镜** mini 功能栏：独立圆形按钮、跟随材质、展开收回和边缘翻转。目前只做 UI 和反馈，未接入今日待办、日程与截图。
 
-## v0.2.2 更新亮点
+## v0.2.3 亮点
 
-- **便签**：新增第七个入口，普通文本 / 待办模板、自动保存、分类文件夹与最近三条内容预览。
-- **专注书写**：文件夹可收为分类条，笔记列表显示摘要与时间；选区加粗和列表，AI 结果内嵌预览并可撤销替换。
-- **智能整理**：内置 CoCo meeting-notes Skill，读取电脑时间和时区整理相对日期，保留待确认信息；支持自定义提示词和 Skill。
-- **交互优化**：导航拖动排序、文件夹平滑横向滚动与边缘渐隐、可爱的收藏气泡和滑动选择反馈。
-- **项目维护**：删除项目支持确认和撤销，只清理项目及关联元数据，保留原始资料。
+- 产品正式统一为 STArra，沿用原数据目录和升级标识，已有内容保留。
+- 「胶囊」生成可整体携带的 `.starrapack` 文件夹，支持扫描清单、缺失确认、取消和校验，恢复到独立新配置。
+- 星砂「使用文档」按功能分篇，附工作流、产品故事；「功能演示」可试用两种预设和 AI 优化。只初始化一次，不覆盖个人编辑。
+- 右键 mini 栏加入星芒主题新图标，52px 独立按钮更贴近小球，名称通过悬停提示显示。
+- 完善 Markdown 预览和编辑、列表平滑收放、页面切换、设置布局与默认外观恢复，新增静态磨砂颗粒。13 套配色、8 种材质。
 
-同时保留 v0.2.1 的功能：
+## 从收集到换机继续
 
-- **织梦台**：第六个入口，支持项目创建、编辑、归档，多项目关联，不移动素材原件。
-- **自动关联**：顶栏中间胶囊选择项目，右键或滑动开关控制快捷保存自动关联；也可本次仅存公共库。
-- **统一索引**：搜索网站、母子卷轴和当前素材库，按类型、标签、关键词及项目筛选。
-- **批量标签**：百宝匣批量添加、移除标签，详情可查看和调整所属项目。
-- **整理与恢复**：继续工作、项目关系撤销与独立备份，回收区手动永久删除和 30 天自动清理。
-- **外观与反馈**：13 套配色、7 种材质，新增云白、液态玻璃和致谢反馈页；统一标签、下拉菜单与开关动画，修复背景模糊抖动。
+创建织梦台项目 → 开启当前项目收集 → 收集网站、卷轴与素材 → 星砂记录与待办 → 预览和复用 → 胶囊扫描并打包 → 新电脑恢复并重建路径。
 
-玻璃保留透明底色、高光和可选桌面模糊，真实桌面折射已关闭。完整内容见 [v0.2.2 发布说明](docs/releases/v0.2.2.md)。
+详细见[工作流](docs/使用文档/13-工作流.md)、[完整产品工作流与规划](docs/STARRA-闪星设计师端完整工作流-v1.0.md)、[品牌故事](docs/STARRA-闪星品牌故事.md)。规划中的云同步、Agent 接力和完整时间线与当前能力分别标注。
 
-## 下载与安装
+## 安装与数据边界
 
-到 [GitHub Releases](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/latest) 下载：
+提供 Windows 10 / 11 x64 安装版和免安装启动版。安装包应从桌面或下载目录运行，不要置于旧安装目录内。无账号也可使用本地功能，网络抓取与自配 AI 需要联网。
 
-| 文件 | 用途 |
-| --- | --- |
-| `musy-desktop-assist-0.2.2-setup.exe` | 安装版，可选目录，创建桌面快捷方式 |
-| `musy-desktop-assist-0.2.2-portable.exe` | 免安装启动版，首次运行需要解压时间 |
-| `Musy-v0.2.2-docs.zip` | 离线使用文档 |
-| `SHA256SUMS.txt` | 对应发布文件的 SHA-256 校验值 |
+默认仅含 64 个公开网站、3 条原创卷轴示例与示意插画、离线快捷键、14 篇使用文档和 3 篇演示，不包含开发者私人提示词、生成效果图、项目、素材或密钥。
 
-支持 Windows 10 / 11 x64，无需预装 Node.js、Python、Rhino 或 Office。外部编辑需要对应软件；部分系统缩略图依赖已注册的格式组件。
+应用继续使用原 `%APPDATA%\musy-desktop-assist` 存储路径及兼容键。百宝匣默认引用原件，剪贴板图片由资料库保存；回收区 30 天到期会清理对应自有文件，外部引用原件保留。
 
-应用尚未签名。若显示未知发布者，请确认下载来自本仓库并核对校验值，再自行决定是否运行。便携版仍使用当前账户的应用数据目录，不会把所有数据自动存到 exe 旁边。
+胶囊的项目/日期范围**只筛选原文件**，完整应用记录与当前资料库自有文件始终包含，可能含其他项目记录及模型密钥。适合个人备份迁移，不应直接作为脱敏交付包分享。未连接资料库需手动添加目录，第三方设计软件需另行安装。
 
-## 一分钟上手
+AI 可选，仅向你配置的接口发送当前操作内容与所选指令，可能产生费用。旧 JSON / 索引备份不含所有原件。详见[胶囊说明](docs/备份与迁移.md)。
 
-1. 启动后找到桌面小球，按住拖动，单击展开功能入口。
-2. **传送门**：复制网址后点收藏邀请，或在面板点「收藏剪贴板」。
-3. **卷轴**：试用示例，拖动林间亭卡片查看日夜变体，再新增自己的提示词。
-4. **百宝匣**：选择资料库后导入文件。单击选择、双击打开、右键编辑、空格轻预览。
-5. **织梦台**：新建项目关联已有资料，或在顶栏开启新资料自动关联；公共资料库可统一搜索。
-6. **便签**：点击文件夹开始新普通文本，左侧打开已有记录；使用专注书写、待办或 AI 优化。
-7. 在设置中选择配色、质感和语言；需要 AI 时再填写自己的接口与密钥。
+## 开发与许可
 
-详细操作、快捷键和迁移方法见[使用指南](docs/使用指南.md)。
+后续源码仅在私有仓库开发。公开仓库保留 v0.2.0 源码与历史版本，提供当前安装包、用户文档、许可和反馈入口；Release 自动生成的 Source code 压缩包不是新版完整源码。
 
-## 内置内容与数据边界
+本项目原创代码采用 [MIT](LICENSE)，第三方各自适用其许可。Bodoni Moda 字体采用 OFL；React Bits 含 MIT + Commons Clause 条件。见[第三方说明](THIRD_PARTY_NOTICES.md)。
 
-发布包只预置 **64 个公开网站、3 条原创卷轴示例及其示意插画**；秘籍的离线快捷键资料仍随功能提供。百宝匣、项目、便签内容和 AI 配置初始为空。不打包开发者的实际提示词、生成效果图、项目文件、素材索引、API Key 或运行缓存。
-
-示例仅初始化未创建过卷轴数据的库，不覆盖已有内容；删除后不会自动补回。正文文件见 [examples/scrolls](examples/scrolls/README.md)。
-
-- 收藏与卷轴保存在 `%APPDATA%\musy-desktop-assist\` 对应的本地浏览器存储中。选定备份文件夹后同步到 `musy-data.json`。
-- 百宝匣有独立资料库。本地文件默认**引用原件**，不会搬动原文件；剪贴板图片保存到资料库 `clipboard/`。
-- `musy-data.json` 不包含百宝匣、API Key 或外观设置。`.musybox` 包含百宝匣索引和封面，**不包含引用原件或剪贴板原图文件**。换电脑需另外复制原文件和 `clipboard/`。
-- 织梦台使用 `.musyprojects` 独立备份项目和关系，不包含源素材；标签随百宝匣保存。回收区满 30 天或手动永久删除会清理库内条目及对应自有文件，外部引用原件保留。
-- 便签保存在 `%APPDATA%\musy-desktop-assist\notes.json`，现有三种导出不包含便签；迁移时退出应用并单独复制主文件及 `.previous` 快照。
-- AI 请求将当前操作内容交给你配置的接口；文档识别可能发送正文和参考图。网站图标抓取可能访问图标服务。详见[数据与迁移](docs/数据与迁移.md)。
-
-## 开发与发布
-
-公开 v0.2.0 源码和历史下载保留；后续源码私有开发，此仓库提供经批准的软件、用户文档和反馈入口。v0.2.2 Release 自动生成的 Source code 压缩包对应公开仓库文档树，不是新版完整源码。旧版构建说明见 [v0.2.0 源码](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/tree/v0.2.0)。
-
-## 当前边界
-
-- 只提供 Windows x64；macOS、Linux、ARM64 尚未提供成品。
-- 点睛笔、全局快捷键、浏览器扩展、智能文件夹、AI 相似检索、完整托管副本迁移仍在规划中。
-- 专业格式显示可读取的保存预览，未实现完整 3D 渲染或工程文件编辑。
-- 含图卷轴使用 localStorage，有容量上限；百宝匣大文件走路径引用，不占用该配额。
-
-后续方向见[开发优先级](docs/百宝匣开发优先级.md)及[路线图](docs/开发评估与路线图.md)。
-
-## 致谢与许可
-
-基于 Electron、React、TypeScript、electron-vite。吉祥物表情来自 [LaoA-GrokBot](https://github.com/zhulin025/LaoA-GrokBot) 的 MIT 代码；格式预览参考 cad-preview；Gooey Nav 改编自 React Bits。详见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) 和 [licenses](licenses)。
-
-Musy 原创代码采用 [MIT](LICENSE)。第三方组件各自适用其许可，其中 React Bits Gooey Nav 含 Commons Clause 条件，不能将仓库全部内容视为无附加条件的 MIT 组件包。
-
-<details>
-<summary>English</summary>
-
-Musy is a local-first Windows desktop companion for designers: website bookmarks, prompt families, offline shortcut references, and a file-reference asset library. Copy a URL or drop files onto the companion to collect them. Preview images, compare references, and drag original files into your workflow. AI is optional and uses your own endpoint. v0.2.2 adds sticky notes, task lists, animated folders, focus writing, AI organization with local date context, reorderable navigation, and smoother collection feedback. Dreamloom provides projects, automatic collection, bulk tags and unified search across bookmarks, scrolls and the connected asset library. It includes 64 public bookmarks and 3 original teaching prompts, with no private projects or credentials. Download from [Releases](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/latest). Metadata backups do not include original asset files.
-
-</details>
+STArra is a local-first desktop companion for designers. v0.2.3 adds self-contained Capsule backups, path-remapped restoration, a UI-only mini toolbar, and built-in Markdown guides and examples. Project/date filters select original files only; full app metadata is still included. Future source development is private; the public repository distributes approved binaries and documentation.
