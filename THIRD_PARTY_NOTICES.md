@@ -16,6 +16,8 @@ STArra 原创代码见根目录 MIT LICENSE。依赖和改编内容保留各自�
 | Meeting Notes Skill | coco-research/coco / Coco Inc. | [MIT](licenses/coco-meeting-notes-LICENSE.txt)，固定提交 `2e838244a0c6a2309e51752fa151b6e335f99b78` 的 skills/meeting-notes/SKILL.md；现为便签默认智能整理指令，应用适配限制为当前便签内容并注入本机时间 |
 | GlassSurface 表面材质 | DavidHDev/react-bits / David Haz | [MIT + Commons Clause](licenses/react-bits-JellyRadio-LICENSE.txt)，直接集成用户提供的官方 JavaScript + CSS 完整源码；原文、哈希和许可位于组件目录。独立的 Windows 背景模糊为 STArra 实现，原分层桌面透镜已退出材质路径 |
 | Electron、React、Vite、TypeScript、mammoth、pdfjs-dist 等 | 各上游项目 | 各依赖包自身许可；Electron 随运行时提供相应许可文件 |
+| Word 文件生成 docx | dolanmiu/docx | [MIT](licenses/docx-MIT.txt)，用于星灵生成标准 DOCX 文件 |
+| Excel 文件生成 ExcelJS | exceljs/exceljs | [MIT](licenses/exceljs-MIT.txt)，用于星灵生成 XLSX 文件 |
 | 软件与网站字标 | 对应权利人及图标数据来源 | 用于识别软件/网站，不表示官方合作或背书 |
 
 Gooey Nav 随 STArra 应用使用，未作为可单独下载的组件产品发布。修改或再分发时请同时查看并遵守原始许可全文。
