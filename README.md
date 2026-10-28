@@ -2,13 +2,13 @@
 
 **让创造，自有星图。**
 
-本地优先的 Windows 桌面创作伙伴，把灵感、提示词、素材、文档与项目放在随手可及的小球里。当前版本 **v0.2.3**。
+本地优先的 Windows 桌面创作伙伴，把灵感、提示词、素材、文档与项目放在随手可及的小球里。当前版本 **v0.3.0**。
 
-**[下载 v0.2.3](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/tag/v0.2.3) · [使用指南](docs/使用指南.md) · [文档目录](docs/README.md) · [更新记录](CHANGELOG.md) · [问题反馈](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/issues)**
+**[下载 v0.3.0](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/tag/v0.3.0) · [使用指南](docs/使用指南.md) · [文档目录](docs/README.md) · [更新记录](CHANGELOG.md) · [问题反馈](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/issues)**
 
 ## 八个入口
 
-| 默认顺序 | 功能 | v0.2.3 能力 |
+| 默认顺序 | 功能 | v0.3.0 能力 |
 | --- | --- | --- |
 | 1 | 星砂 | 普通文本、待办、Markdown 编辑与导出、专注书写、可选 AI 优化；内置 14 篇使用文档与 3 篇演示 |
 | 2 | 织梦台 | 项目关联、统一索引、自动收集与继续工作 |
@@ -21,7 +21,7 @@
 
 右键小球呼出 **星笺、星轨、星镜** mini 功能栏：独立圆形按钮、跟随材质、展开收回和边缘翻转。目前只做 UI 和反馈，未接入今日待办、日程与截图。
 
-## v0.2.3 亮点
+## v0.3.0 亮点
 
 - 产品正式统一为 STArra，沿用原数据目录和升级标识，已有内容保留。
 - 「胶囊」生成可整体携带的 `.starrapack` 文件夹，支持扫描清单、缺失确认、取消和校验，恢复到独立新配置。
@@ -53,4 +53,4 @@ AI 可选，仅向你配置的接口发送当前操作内容与所选指令，�
 
 本项目原创代码采用 [MIT](LICENSE)，第三方各自适用其许可。Bodoni Moda 字体采用 OFL；React Bits 含 MIT + Commons Clause 条件。见[第三方说明](THIRD_PARTY_NOTICES.md)。
 
-STArra is a local-first desktop companion for designers. v0.2.3 adds self-contained Capsule backups, path-remapped restoration, a UI-only mini toolbar, and built-in Markdown guides and examples. Project/date filters select original files only; full app metadata is still included. Future source development is private; the public repository distributes approved binaries and documentation.
+STArra is a local-first desktop companion for designers. v0.3.0 adds self-contained Capsule backups, path-remapped restoration, a UI-only mini toolbar, and built-in Markdown guides and examples. Project/date filters select original files only; full app metadata is still included. Future source development is private; the public repository distributes approved binaries and documentation.
