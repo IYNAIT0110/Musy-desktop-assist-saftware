@@ -14,6 +14,7 @@ STArra 原创代码见根目录 MIT LICENSE。依赖和改编内容保留各自�
 | Folder / Book 便签分类书册 | DavidHDev/react-bits / David Haz | [MIT + Commons Clause](licenses/react-bits-Folder-LICENSE.txt)，官方 TypeScript + CSS 组件，用于便签分类的悬停翻开；缩小尺寸、关闭拖出与缩放 |
 | Obsidian Markdown Skill | kepano/obsidian-skills / Steph Ango | [MIT](licenses/obsidian-markdown-LICENSE.txt)，固定提交 `3ccff5338ea700537839b21900aa5358a0402c98` 的 obsidian-markdown SKILL.md 与三个参考文档；用于便签 AI 整理的文本指令，STArra 另加通用 Markdown、事实与待办状态保留要求 |
 | Meeting Notes Skill | coco-research/coco / Coco Inc. | [MIT](licenses/coco-meeting-notes-LICENSE.txt)，固定提交 `2e838244a0c6a2309e51752fa151b6e335f99b78` 的 skills/meeting-notes/SKILL.md；现为便签默认智能整理指令，应用适配限制为当前便签内容并注入本机时间 |
+| Orb 流光光环 | DavidHDev/react-bits / David Haz | [MIT + Commons Clause](licenses/react-bits-Orb-LICENSE.txt)，集成用户提供的原版 WebGL 组件，增加外侧布局、粗细调节、调用波峰与缩放亮度动画 |
 | GlassSurface 表面材质 | DavidHDev/react-bits / David Haz | [MIT + Commons Clause](licenses/react-bits-JellyRadio-LICENSE.txt)，直接集成用户提供的官方 JavaScript + CSS 完整源码；原文、哈希和许可位于组件目录。独立的 Windows 背景模糊为 STArra 实现，原分层桌面透镜已退出材质路径 |
 | Electron、React、Vite、TypeScript、mammoth、pdfjs-dist 等 | 各上游项目 | 各依赖包自身许可；Electron 随运行时提供相应许可文件 |
 | Word 文件生成 docx | dolanmiu/docx | [MIT](licenses/docx-MIT.txt)，用于星灵生成标准 DOCX 文件 |
