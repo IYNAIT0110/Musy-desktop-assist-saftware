@@ -2,16 +2,16 @@
 
 **让创造，自有星图。**
 
-本地优先的 Windows 桌面创作伙伴，把灵感、提示词、素材、文档与项目放在随手可及的小球里。当前版本 **v0.3.2**。
+本地优先的 Windows 桌面创作伙伴，把灵感、提示词、素材、文档与项目放在随手可及的小球里。当前版本 **v0.3.3**。
 
-**[下载 v0.3.2](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/tag/v0.3.2) · [使用指南](docs/使用指南.md) · [文档目录](docs/README.md) · [更新记录](CHANGELOG.md) · [问题反馈](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/issues)**
+**[下载 v0.3.3](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/tag/v0.3.3) · [使用指南](docs/使用指南.md) · [文档目录](docs/README.md) · [更新记录](CHANGELOG.md) · [问题反馈](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/issues)**
 
 ## 七个入口
 
-| 默认顺序 | 功能 | v0.3.2 能力 |
+| 默认顺序 | 功能 | v0.3.3 能力 |
 | --- | --- | --- |
 | 1 | 星砂 | 普通文本、待办、Markdown 编辑与导出、专注书写、可选 AI 优化；内置 16 篇使用文档与 3 篇演示 |
-| 2 | 织梦台 | 项目关联、统一索引、自动收集与继续工作 |
+| 2 | 织梦台 | 项目文件看板、时间与关系图、版本归组、真实快照、项目关联与继续工作 |
 | 3 | 卷轴 | 母子提示词、预览图、卡牌切换、复制与可选 AI 扩写/翻译 |
 | 4 | 百宝匣 | 文件夹与剪贴板导入、原件引用、标签分组、轻预览、并排参考、拖出原件 |
 | 5 | 传送门 | 收藏、分组和搜索网站，内置 64 个公开网址 |
@@ -20,16 +20,16 @@
 
 右键小球呼出 **星笺、星轨、星镜** mini 功能栏：独立圆形按钮、跟随材质、展开收回和边缘翻转。星笺已接入本地任务时间线与 AI 提取；星轨、星镜仍为规划入口。中键小球打开 STArra 星灵对话。
 
-## v0.3.2 亮点
+## v0.3.3 亮点
 
-- 外部 Agent 连接、执行、等待确认及结果通过小球光环与气泡反馈。
-- 保留双星轨道，新增原版 Orb 流光光环；大小与粗细可调，实时保存。
-- 每次 MCP 调用依次放大提亮、波峰绕行一圈、平滑恢复；支持减少动态效果。
-- 气泡与小球居中对齐并跟随拖动，靠边自动换边；普通、失败、确认提示分别停留 8、12、15 秒。
-- 修复玻璃圆角、透明边角、提示词列表与详情接缝、工具栏底板溢出和快速展开压缩问题。
-- 优化百宝匣收集、导入反馈和整理界面；保留星笺、星砂同步、星灵、MCP 修改确认及胶囊备份。
+- 织梦台新增项目目录文件看板，以文件、时间和圆点关系图查看项目。
+- 类型、日期、状态筛选，卡片与列表切换；人工版本归组，明确当前工作版本。
+- 导出、引用、参考与分支关系由用户确认；选择目标时显示缩略图，来源变化后提醒核对。
+- 主动保存真实内容快照或项目节点；历史预览、并排参考、校验后恢复副本，保留原件。
+- 浏览项目与全局收集目标分离；胶囊包含看板索引、关系和快照，支持换机恢复。
+- 保留 v0.3.2 的 MCP 光环、气泡、玻璃材质和已有功能。
 
-详见 [v0.3.2 发布说明](docs/releases/v0.3.2.md)、[外部 Agent 接入](docs/使用文档/16-外部Agent.md)、[外观](docs/使用文档/12-设置与外观.md)。
+详见 [v0.3.3 发布说明](docs/releases/v0.3.3.md)、[文件看板使用说明](docs/织梦台文件看板.md)、[设计调研与开发进度](docs/plans/织梦台文件看板-版本与关系设计调研-2026-10-29.md)。
 
 ## 从收集到换机继续
 
@@ -55,4 +55,4 @@ AI 可选，仅向你配置的接口发送当前操作内容与所选指令，�
 
 本项目原创代码采用 [MIT](LICENSE)，第三方各自适用其许可。Bodoni Moda 字体采用 OFL；React Bits 含 MIT + Commons Clause 条件。见[第三方说明](THIRD_PARTY_NOTICES.md)。
 
-STArra is a local-first Windows desktop companion for designers. v0.3.2 adds configurable animated MCP feedback, call-driven wave motion, aligned follow-along speech bubbles, and interface fixes. Future source development is private; the public repository distributes approved binaries and documentation.
+STArra is a local-first Windows desktop companion for designers. v0.3.3 adds a project file board, timelines, manually confirmed relationships, version groups, content snapshots, and capsule migration. Future source development is private; the public repository distributes approved binaries and documentation.
