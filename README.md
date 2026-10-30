@@ -6,7 +6,7 @@
 
 **简体中文 · [English](README.en.md)**
 
-[![Version](https://img.shields.io/badge/version-v0.3.3-536d8a)](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/tag/v0.3.3)
+[![Version](https://img.shields.io/badge/version-v0.3.4-536d8a)](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/tag/v0.3.4)
 ![Platform](https://img.shields.io/badge/platform-Windows_10%20%2F%2011_x64-626b78)
 ![Interface languages](https://img.shields.io/badge/UI-中文%20%7C%20English%20%7C%20日本語-687e70)
 
@@ -29,10 +29,10 @@
 
 | 下载文件 | 用途 |
 | --- | --- |
-| [starra-0.3.3-setup.exe](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.3/starra-0.3.3-setup.exe) | 常规安装，适合长期使用 |
-| [starra-0.3.3-portable.exe](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.3/starra-0.3.3-portable.exe) | 免安装启动；应用数据仍保存在当前 Windows 用户目录，不会自动随 exe 携带 |
-| [STArra-v0.3.3-docs.zip](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.3/STArra-v0.3.3-docs.zip) | 使用说明、工作流、示例和第三方许可 |
-| [SHA256SUMS.txt](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.3/SHA256SUMS.txt) | 下载文件的 SHA-256 校验值 |
+| [starra-0.3.4-setup.exe](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.4/starra-0.3.4-setup.exe) | 常规安装，适合长期使用 |
+| [starra-0.3.4-portable.exe](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.4/starra-0.3.4-portable.exe) | 免安装启动；应用数据仍保存在当前 Windows 用户目录，不会自动随 exe 携带 |
+| [STArra-v0.3.4-docs.zip](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.4/STArra-v0.3.4-docs.zip) | 使用说明、工作流、示例和第三方许可 |
+| [SHA256SUMS.txt](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.4/SHA256SUMS.txt) | 下载文件的 SHA-256 校验值 |
 
 1. 从下载目录或桌面运行安装包，**不要把安装包放在旧安装目录内运行**。升级前建议先创建胶囊备份。
 2. 左键点击小球，打开功能栏；进入「织梦台」创建项目并选择项目文件夹。
@@ -61,7 +61,13 @@
 
 MCP 状态可使用双星轨道或流光光环，光圈大小与粗细可调；提示气泡跟随小球移动。系统开启减少动态效果时，相关反馈使用静态提示。
 
-## v0.3.3：看清项目文件、版本与来源
+## v0.3.4：小球停泊星岛，任务化作胶囊
+
+收起的小球拖到顶部松手，连续变形成居中的星岛，机器人眼睛自动眨眼并响应应用状态。右键星岛，三个 mini 按钮横排在下方；右键星笺，每项今日任务成为独立胶囊气泡。再次点击刘海可隐藏气泡。星笺改用应用内时间选择，并补充异常恢复；顶栏搜索按钮或 Ctrl+K 可查找资料。
+
+[星岛操作指南](docs/星岛顶部停泊.md) · [v0.3.4 发布说明](docs/releases/v0.3.4.md)
+
+## 项目文件、版本与来源
 
 ### 文件、时间与关系，三个工作视角
 
@@ -77,7 +83,7 @@ MCP 状态可使用双星轨道或流光光环，光圈大小与粗细可调；�
 
 默认快照总额度为 5 GB，可调整为 1–100 GB；单文件最多 2 GB，每次最多选择 60 个文件。扫描上限为每项目 12,000 个条目，关系图单次最多展示 180 个文件，可先搜索和筛选缩小范围。
 
-[文件看板使用说明](docs/织梦台文件看板.md) · [v0.3.3 发布说明](docs/releases/v0.3.3.md)
+[文件看板使用说明](docs/织梦台文件看板.md) · [v0.3.4 发布说明](docs/releases/v0.3.4.md)
 
 ## 一个完整的设计工作流
 
@@ -134,13 +140,13 @@ MCP 状态可使用双星轨道或流光光环，光圈大小与粗细可调；�
 | 便签、任务时间线、可选 AI 与本机 MCP | 配置模型服务、授权目录、确认修改 | 云协作、通用电脑控制 |
 | 星笺任务入口 | 关联和核对任务内容 | 星轨、星镜的完整规划能力 |
 
-v0.3.3 已通过两套类型检查、225 项回归测试，以及隔离数据目录下的界面与发布包验证。格式预览与系统效果仍取决于文件结构、Windows 缩略图组件及显卡环境；没有预览时可用对应原软件打开。
+v0.3.4 已通过两套类型检查、238 项回归测试，以及隔离数据目录下的界面与发布包验证。格式预览与系统效果仍取决于文件结构、Windows 缩略图组件及显卡环境；没有预览时可用对应原软件打开。
 
 ## 文档与反馈
 
 - [使用指南与全部文档](docs/README.md)
 - [项目文件看板](docs/织梦台文件看板.md) · [外观设置](docs/外观配色与质感.md)
-- [版本发布说明](docs/releases/v0.3.3.md) · [更新记录](CHANGELOG.md)
+- [版本发布说明](docs/releases/v0.3.4.md) · [更新记录](CHANGELOG.md)
 - [品牌故事](docs/STARRA-闪星品牌故事.md)
 
 遇到问题可在 [GitHub Issues](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/issues) 提供版本号、Windows 版本、复现步骤和截图；涉及素材格式时注明扩展名及相关预览条件，请勿附带密钥或私人项目原件。

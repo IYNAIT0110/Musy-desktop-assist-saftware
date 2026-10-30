@@ -6,6 +6,7 @@ STArra 原创代码见根目录 MIT LICENSE。依赖和改编内容保留各自�
 | --- | --- | --- |
 | STArra 品牌字标字体 Bodoni Moda | Bodoni Moda 字体项目 | [SIL Open Font License 1.1](licenses/BodoniModa-OFL.txt)，随应用内置字体，保留原字体授权 |
 | 吉祥物轮廓与表情数据 | LaoA-GrokBot / zhulin025 | [MIT](licenses/LaoA-GrokBot-MIT.txt) |
+| 星岛机器人眼睛 | [CX-ArtLab/agent-robot-avatar](https://github.com/CX-ArtLab/agent-robot-avatar) / CX ART Lab | [MIT](licenses/Agent-Robot-Avatar-MIT.txt)，固定提交 `894ae731742af09d5479139d75b0b323eb130bae`；适配原眼形、眼皮、眨眼、闲置张望、waiting-wave、笑眼、失败垂眼及 wary，复用 STArra 的两只眼睛路径；未采用上游头部、天线和皮肤，不主张其角色视觉身份 |
 | 部分设计格式预览解析 | cinderblock/cad-preview | [MIT](licenses/cad-preview-MIT.txt)，已增加读取、解压和像素边界 |
 | Gooey Nav 导航 | DavidHDev/react-bits / David Haz | [MIT + Commons Clause](licenses/react-bits-GooeyNav-LICENSE.txt)，保留附加条件；不得将该组件独立或作为组件包转售/再分发 |
 | Jelly Radio 标签切换动画 | DavidHDev/react-bits / David Haz | [MIT + Commons Clause](licenses/react-bits-JellyRadio-LICENSE.txt)，沿用原版运动目标与弹簧参数，适配本地主题及共享按钮 |

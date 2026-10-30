@@ -6,7 +6,7 @@ A local-first Windows desktop workspace for designers. A floating companion brin
 
 **[简体中文](README.md) · English**
 
-[![Version](https://img.shields.io/badge/version-v0.3.3-536d8a)](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/tag/v0.3.3)
+[![Version](https://img.shields.io/badge/version-v0.3.4-536d8a)](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/tag/v0.3.4)
 ![Platform](https://img.shields.io/badge/platform-Windows_10%20%2F%2011_x64-626b78)
 ![Interface languages](https://img.shields.io/badge/UI-Chinese%20%7C%20English%20%7C%20Japanese-687e70)
 
@@ -25,16 +25,22 @@ A design project's context often lives across folders, browser bookmarks, conver
 
 STArra is intended for architecture, interior, landscape, and other design workflows involving models, drawings, images, documents, and references. It does not replace design software or treat manually confirmed file relationships as automatically parsed professional dependencies.
 
+## New in v0.3.4
+
+Drag the collapsed ball to the top edge and release to morph it continuously into Star Island. Its robot eyes blink and reflect app states. Right-click the island for three horizontally aligned mini tools. Right-click Star Note for individual pill-shaped task bubbles; click the island to dismiss them. Time editing now uses in-app hour/minute menus, with recovery when the task window fails. Use the toolbar search button or Ctrl+K for global search. Docking is currently per session.
+
+[Star Island guide (Chinese)](docs/星岛顶部停泊.md) · [Release notes](docs/releases/v0.3.4.md)
+
 ## Installation and first steps
 
 Requires **Windows 10 or 11, x64**. Choose your interface language in Settings.
 
 | Download | Purpose |
 | --- | --- |
-| [starra-0.3.3-setup.exe](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.3/starra-0.3.3-setup.exe) | Standard installer for regular use |
-| [starra-0.3.3-portable.exe](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.3/starra-0.3.3-portable.exe) | Launch without installing. Application data still resides in the current Windows user profile; it does not automatically travel with the executable |
-| [STArra-v0.3.3-docs.zip](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.3/STArra-v0.3.3-docs.zip) | Guides, workflows, examples, and third-party notices |
-| [SHA256SUMS.txt](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.3/SHA256SUMS.txt) | SHA-256 checksums for the release files |
+| [starra-0.3.4-setup.exe](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.4/starra-0.3.4-setup.exe) | Standard installer for regular use |
+| [starra-0.3.4-portable.exe](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.4/starra-0.3.4-portable.exe) | Launch without installing. Application data still resides in the current Windows user profile; it does not automatically travel with the executable |
+| [STArra-v0.3.4-docs.zip](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.4/STArra-v0.3.4-docs.zip) | Guides, workflows, examples, and third-party notices |
+| [SHA256SUMS.txt](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.4/SHA256SUMS.txt) | SHA-256 checksums for the release files |
 
 1. Run the installer from Downloads or your desktop. **Do not run it from inside the existing installation directory.** Create a Capsule backup before upgrading.
 2. Left-click the ball to open the toolbar. Create a project in the project workspace and select its directory.
@@ -65,7 +71,7 @@ Reorder the main toolbar by dragging its tools. The main toolbar, mini tools, an
 
 MCP feedback can use a twin-star orbit or a flowing halo, with adjustable halo size and thickness. Speech bubbles follow the ball as it moves. Relevant feedback becomes static when the system requests reduced motion.
 
-## v0.3.3: project files, versions, and provenance
+## v0.3.4: project files, versions, and provenance
 
 ### Three views of your work
 
@@ -81,7 +87,7 @@ Saving a snapshot or a named project checkpoint copies real file content and rec
 
 The default snapshot budget is 5 GB, configurable from 1–100 GB. Individual files are limited to 2 GB, with up to 60 files per snapshot operation. Scans support up to 12,000 entries per project; a graph displays up to 180 files at once. Search and filter to narrow larger projects.
 
-[File board guide — Chinese](docs/织梦台文件看板.md) · [v0.3.3 release notes — Chinese](docs/releases/v0.3.3.md)
+[File board guide — Chinese](docs/织梦台文件看板.md) · [v0.3.4 release notes — Chinese](docs/releases/v0.3.4.md)
 
 ## An end-to-end design workflow
 
@@ -138,13 +144,13 @@ First-run content consists of public websites, original prompt examples and illu
 | Notes, task timeline, optional AI, and local MCP | Configure model providers, authorize folders, and approve changes | Cloud collaboration and general computer control |
 | Star Notes task entry point | Associate and review task content | Full functionality planned for 星轨 and 星镜 |
 
-v0.3.3 passed both TypeScript checks, 225 regression tests, and isolated-data interface and package validation. Preview availability and visual effects still depend on file structure, Windows thumbnail providers, and graphics hardware. Files without previews can be opened in their original applications.
+v0.3.4 passed both TypeScript checks, 238 regression tests, and isolated-data interface and package validation. Preview availability and visual effects still depend on file structure, Windows thumbnail providers, and graphics hardware. Files without previews can be opened in their original applications.
 
 ## Documentation and support
 
 - [Documentation index — Chinese](docs/README.md)
 - [Project file board — Chinese](docs/织梦台文件看板.md) · [Appearance — Chinese](docs/外观配色与质感.md)
-- [Release notes — Chinese](docs/releases/v0.3.3.md) · [Changelog — Chinese](CHANGELOG.md)
+- [Release notes — Chinese](docs/releases/v0.3.4.md) · [Changelog — Chinese](CHANGELOG.md)
 - [Product story — Chinese](docs/STARRA-闪星品牌故事.md)
 
 For a bug report, open a [GitHub issue](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/issues) with the application version, Windows version, reproduction steps, and a screenshot. For preview problems, include the file extension and relevant thumbnail-provider information. Do not attach credentials or private project originals.
