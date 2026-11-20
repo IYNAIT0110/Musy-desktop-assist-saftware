@@ -6,8 +6,7 @@ A local-first Windows desktop workspace for designers. A floating companion brin
 
 **[简体中文](README.md) · English**
 
-[![Version](https://img.shields.io/github/v/release/=version&color=536d8a)](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/latest)
-![Platform](https://img.shields.io/badge/platform-Windows_10%20%2F%2011_x64-626b78)
+**[v0.3.6](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/tag/v0.3.6)** · ![Platform](https://img.shields.io/badge/platform-Windows_10%20%2F%2011_x64-626b78)
 ![Interface languages](https://img.shields.io/badge/UI-Chinese%20%7C%20English%20%7C%20Japanese-687e70)
 
 [Download](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/latest) · [Documentation](docs/README.md) · [Changelog](CHANGELOG.md) · [Report an issue](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/issues)
