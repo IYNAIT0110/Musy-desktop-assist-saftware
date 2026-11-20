@@ -6,7 +6,7 @@
 
 **简体中文 · [English](README.en.md)**
 
-[![Version](https://img.shields.io/badge/version-v0.3.4-536d8a)](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/tag/v0.3.4)
+[![Version](https://img.shields.io/github/v/release/=version&color=536d8a)](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/latest)
 ![Platform](https://img.shields.io/badge/platform-Windows_10%20%2F%2011_x64-626b78)
 ![Interface languages](https://img.shields.io/badge/UI-中文%20%7C%20English%20%7C%20日本語-687e70)
 
