@@ -20,6 +20,7 @@ STArra 原创代码见根目录 MIT LICENSE。依赖和改编内容保留各自�
 | Electron、React、Vite、TypeScript、mammoth、pdfjs-dist 等 | 各上游项目 | 各依赖包自身许可；Electron 随运行时提供相应许可文件 |
 | Word 文件生成 docx | dolanmiu/docx | [MIT](licenses/docx-MIT.txt)，用于星灵生成标准 DOCX 文件 |
 | Excel 文件生成 ExcelJS | exceljs/exceljs | [MIT](licenses/exceljs-MIT.txt)，用于星灵生成 XLSX 文件 |
+| 文件关系图谱力模拟 | D3 | [D3 Force](licenses/d3-force-LICENSE.txt)、[D3 Dispatch](licenses/d3-dispatch-LICENSE.txt)、[D3 Quadtree](licenses/d3-quadtree-LICENSE.txt)、[D3 Timer](licenses/d3-timer-LICENSE.txt) |
 | 软件与网站字标 | 对应权利人及图标数据来源 | 用于识别软件/网站，不表示官方合作或背书 |
 
 Gooey Nav 随 STArra 应用使用，未作为可单独下载的组件产品发布。修改或再分发时请同时查看并遵守原始许可全文。

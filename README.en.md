@@ -14,6 +14,12 @@ A local-first Windows desktop workspace for designers. A floating companion brin
 
 > This README provides an English overview and setup guide. Most linked detailed guides and release notes are currently in Simplified Chinese. The application interface supports Chinese, English, and Japanese.
 
+## New in v0.3.5
+
+Star Map shows project activity, review items, recent work, and a file modification heatmap. The project workspace opens with a project gallery and supports drag-and-drop covers. Its file board offers grid, list, timeline, and graph views. Star Pin collects scheduled and unscheduled tasks and can be opened by an Agent through MCP.
+
+[Release notes](docs/releases/v0.3.5.md)
+
 ## What STArra is for
 
 A design project's context often lives across folders, browser bookmarks, conversations, and temporary notes. STArra gives that material a shared desktop entry point while keeping original files in place and letting you continue using your existing design applications.
@@ -37,10 +43,10 @@ Requires **Windows 10 or 11, x64**. Choose your interface language in Settings.
 
 | Download | Purpose |
 | --- | --- |
-| [starra-0.3.4-setup.exe](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.4/starra-0.3.4-setup.exe) | Standard installer for regular use |
-| [starra-0.3.4-portable.exe](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.4/starra-0.3.4-portable.exe) | Launch without installing. Application data still resides in the current Windows user profile; it does not automatically travel with the executable |
-| [STArra-v0.3.4-docs.zip](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.4/STArra-v0.3.4-docs.zip) | Guides, workflows, examples, and third-party notices |
-| [SHA256SUMS.txt](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.4/SHA256SUMS.txt) | SHA-256 checksums for the release files |
+| [starra-0.3.5-setup.exe](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.5/starra-0.3.5-setup.exe) | Standard installer for regular use |
+| [starra-0.3.5-portable.exe](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.5/starra-0.3.5-portable.exe) | Launch without installing. Application data still resides in the current Windows user profile; it does not automatically travel with the executable |
+| [STArra-v0.3.5-docs.zip](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.5/STArra-v0.3.5-docs.zip) | Guides, workflows, examples, and third-party notices |
+| [SHA256SUMS.txt](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.5/SHA256SUMS.txt) | SHA-256 checksums for the release files |
 
 1. Run the installer from Downloads or your desktop. **Do not run it from inside the existing installation directory.** Create a Capsule backup before upgrading.
 2. Left-click the ball to open the toolbar. Create a project in the project workspace and select its directory.
@@ -150,7 +156,7 @@ v0.3.4 passed both TypeScript checks, 238 regression tests, and isolated-data in
 
 - [Documentation index — Chinese](docs/README.md)
 - [Project file board — Chinese](docs/织梦台文件看板.md) · [Appearance — Chinese](docs/外观配色与质感.md)
-- [Release notes — Chinese](docs/releases/v0.3.4.md) · [Changelog — Chinese](CHANGELOG.md)
+- [Release notes — Chinese](docs/releases/v0.3.5.md) · [Changelog — Chinese](CHANGELOG.md)
 - [Product story — Chinese](docs/STARRA-闪星品牌故事.md)
 
 For a bug report, open a [GitHub issue](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/issues) with the application version, Windows version, reproduction steps, and a screenshot. For preview problems, include the file extension and relevant thumbnail-provider information. Do not attach credentials or private project originals.
