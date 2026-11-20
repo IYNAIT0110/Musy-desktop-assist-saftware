@@ -14,11 +14,11 @@ A local-first Windows desktop workspace for designers. A floating companion brin
 
 > This README provides an English overview and setup guide. Most linked detailed guides and release notes are currently in Simplified Chinese. The application interface supports Chinese, English, and Japanese.
 
-## New in v0.3.5
+## New in v0.3.6
 
-Star Map shows project activity, review items, recent work, and a file modification heatmap. The project workspace opens with a project gallery and supports drag-and-drop covers. Its file board offers grid, list, timeline, and graph views. Star Pin collects scheduled and unscheduled tasks and can be opened by an Agent through MCP.
+Drag the orb near either screen edge to dock the vertical sidebar. After three seconds away, it tucks into an edge handle that reveals the sidebar on hover. The workspace picker uses project thumbnails in both sidebar states. Feature pages use floating cards, with side-by-side lists and details where space permits. Star Pin can tuck away at the screen edge, and appearance uses the default matte material with dark and light themes.
 
-[Release notes](docs/releases/v0.3.5.md)
+[Release notes](docs/releases/v0.3.6.md)
 
 ## What STArra is for
 
@@ -43,10 +43,10 @@ Requires **Windows 10 or 11, x64**. Choose your interface language in Settings.
 
 | Download | Purpose |
 | --- | --- |
-| [starra-0.3.5-setup.exe](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.5/starra-0.3.5-setup.exe) | Standard installer for regular use |
-| [starra-0.3.5-portable.exe](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.5/starra-0.3.5-portable.exe) | Launch without installing. Application data still resides in the current Windows user profile; it does not automatically travel with the executable |
-| [STArra-v0.3.5-docs.zip](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.5/STArra-v0.3.5-docs.zip) | Guides, workflows, examples, and third-party notices |
-| [SHA256SUMS.txt](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.5/SHA256SUMS.txt) | SHA-256 checksums for the release files |
+| [starra-0.3.6-setup.exe](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.6/starra-0.3.6-setup.exe) | Standard installer for regular use |
+| [starra-0.3.6-portable.exe](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.6/starra-0.3.6-portable.exe) | Launch without installing. Application data still resides in the current Windows user profile; it does not automatically travel with the executable |
+| [STArra-v0.3.6-docs.zip](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.6/STArra-v0.3.6-docs.zip) | Guides, workflows, examples, and third-party notices |
+| [SHA256SUMS.txt](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.6/SHA256SUMS.txt) | SHA-256 checksums for the release files |
 
 1. Run the installer from Downloads or your desktop. **Do not run it from inside the existing installation directory.** Create a Capsule backup before upgrading.
 2. Left-click the ball to open the toolbar. Create a project in the project workspace and select its directory.
@@ -73,7 +73,7 @@ The right-click mini toolbar includes **Star Notes (星笺)**, a task-based time
 
 ## Desktop interaction and appearance
 
-Reorder the main toolbar by dragging its tools. The main toolbar, mini tools, and assistant retain separate mouse entry points. Choose from 13 color themes and 8 materials, with independent theme and material-strength settings. Liquid glass retains rim highlights and optional system background blur; continuous desktop refraction is disabled.
+Drag the orb to switch between the floating toolbar and edge sidebar. The toolbar, mini tools, and assistant have separate entry points. Choose graphite or white with the default matte material.
 
 MCP feedback can use a twin-star orbit or a flowing halo, with adjustable halo size and thickness. Speech bubbles follow the ball as it moves. Relevant feedback becomes static when the system requests reduced motion.
 
@@ -156,7 +156,7 @@ v0.3.4 passed both TypeScript checks, 238 regression tests, and isolated-data in
 
 - [Documentation index — Chinese](docs/README.md)
 - [Project file board — Chinese](docs/织梦台文件看板.md) · [Appearance — Chinese](docs/外观配色与质感.md)
-- [Release notes — Chinese](docs/releases/v0.3.5.md) · [Changelog — Chinese](CHANGELOG.md)
+- [Release notes — Chinese](docs/releases/v0.3.6.md) · [Changelog — Chinese](CHANGELOG.md)
 - [Product story — Chinese](docs/STARRA-闪星品牌故事.md)
 
 For a bug report, open a [GitHub issue](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/issues) with the application version, Windows version, reproduction steps, and a screenshot. For preview problems, include the file extension and relevant thumbnail-provider information. Do not attach credentials or private project originals.

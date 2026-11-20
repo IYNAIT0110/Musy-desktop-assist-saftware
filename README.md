@@ -12,11 +12,11 @@
 
 [下载最新版](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/latest) · [使用指南](docs/使用指南.md) · [文档目录](docs/README.md) · [更新记录](CHANGELOG.md) · [问题反馈](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/issues)
 
-## v0.3.5 新功能
+## v0.3.6 新功能
 
-星图查看项目概况、待核对项、最近工作和文件修改热力图。织梦台默认打开项目卡片墙，可拖入图片更换封面，在文件看板切换卡片、列表、时间和关系视图。右键小球打开星钉，可管理有日期和未排期的待办。Agent 可以通过 MCP 呼出星钉、控制星图和操作项目文件关系。
+拖动小球贴近屏幕左右边缘可切换为竖向侧栏，离开 3 秒后自动收边，悬停提示条恢复。折叠与展开共用带项目封面的工作空间入口。功能页面采用分区悬浮卡片，宽窗口并排展示列表和详情。星钉支持贴边收纳，外观统一使用默认哑光材质和深浅主题。
 
-[使用指南](docs/使用指南.md) · [v0.3.5 发布说明](docs/releases/v0.3.5.md)
+[使用指南](docs/使用指南.md) · [v0.3.6 发布说明](docs/releases/v0.3.6.md)
 
 ## 产品定位
 
@@ -35,10 +35,10 @@
 
 | 下载文件 | 用途 |
 | --- | --- |
-| [starra-0.3.5-setup.exe](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.5/starra-0.3.5-setup.exe) | 常规安装，适合长期使用 |
-| [starra-0.3.5-portable.exe](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.5/starra-0.3.5-portable.exe) | 免安装启动；应用数据仍保存在当前 Windows 用户目录，不会自动随 exe 携带 |
-| [STArra-v0.3.5-docs.zip](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.5/STArra-v0.3.5-docs.zip) | 使用说明、工作流、示例和第三方许可 |
-| [SHA256SUMS.txt](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.5/SHA256SUMS.txt) | 下载文件的 SHA-256 校验值 |
+| [starra-0.3.6-setup.exe](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.6/starra-0.3.6-setup.exe) | 常规安装，适合长期使用 |
+| [starra-0.3.6-portable.exe](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.6/starra-0.3.6-portable.exe) | 免安装启动；应用数据仍保存在当前 Windows 用户目录，不会自动随 exe 携带 |
+| [STArra-v0.3.6-docs.zip](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.6/STArra-v0.3.6-docs.zip) | 使用说明、工作流、示例和第三方许可 |
+| [SHA256SUMS.txt](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.6/SHA256SUMS.txt) | 下载文件的 SHA-256 校验值 |
 
 1. 从下载目录或桌面运行安装包，**不要把安装包放在旧安装目录内运行**。升级前建议先创建胶囊备份。
 2. 左键点击小球，打开功能栏；进入「织梦台」创建项目并选择项目文件夹。
@@ -63,7 +63,7 @@
 
 ## 桌面交互与外观
 
-功能栏支持拖动排序；小球的主功能、mini 栏与对话入口各自保留。提供 13 套配色、8 种材质，可分别调整配色与质感强度。液态玻璃保留边缘高光与可选系统背景模糊，真实桌面连续折射没有启用。
+拖动小球可在浮动工具栏和贴边侧栏之间切换。小球的主功能、mini 栏与对话有独立入口。外观提供石墨和云白主题，统一使用默认的经典哑光材质。
 
 MCP 状态可使用双星轨道或流光光环，光圈大小与粗细可调；提示气泡跟随小球移动。系统开启减少动态效果时，相关反馈使用静态提示。
 
@@ -152,7 +152,7 @@ v0.3.4 已通过两套类型检查、238 项回归测试，以及隔离数据目
 
 - [使用指南与全部文档](docs/README.md)
 - [项目文件看板](docs/织梦台文件看板.md) · [外观设置](docs/外观配色与质感.md)
-- [版本发布说明](docs/releases/v0.3.5.md) · [更新记录](CHANGELOG.md)
+- [版本发布说明](docs/releases/v0.3.6.md) · [更新记录](CHANGELOG.md)
 - [品牌故事](docs/STARRA-闪星品牌故事.md)
 
 遇到问题可在 [GitHub Issues](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/issues) 提供版本号、Windows 版本、复现步骤和截图；涉及素材格式时注明扩展名及相关预览条件，请勿附带密钥或私人项目原件。
