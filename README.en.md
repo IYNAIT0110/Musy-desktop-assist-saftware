@@ -6,18 +6,18 @@ A local-first Windows desktop workspace for designers. A floating companion brin
 
 **[简体中文](README.md) · English**
 
-**[v0.3.6](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/tag/v0.3.6)** · ![Platform](https://img.shields.io/badge/platform-Windows_10%20%2F%2011_x64-626b78)
+**[v0.3.7](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/tag/v0.3.7)** · ![Platform](https://img.shields.io/badge/platform-Windows_10%20%2F%2011_x64-626b78)
 ![Interface languages](https://img.shields.io/badge/UI-Chinese%20%7C%20English%20%7C%20Japanese-687e70)
 
 [Download](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/latest) · [Documentation](docs/README.md) · [Changelog](CHANGELOG.md) · [Report an issue](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/issues)
 
 > This README provides an English overview and setup guide. Most linked detailed guides and release notes are currently in Simplified Chinese. The application interface supports Chinese, English, and Japanese.
 
-## New in v0.3.6
+## New in v0.3.7
 
-Drag the orb near either screen edge to dock the vertical sidebar. After three seconds away, it tucks into an edge handle that reveals the sidebar on hover. The workspace picker uses project thumbnails in both sidebar states. Feature pages use floating cards, with side-by-side lists and details where space permits. Star Pin can tuck away at the screen edge, and appearance uses the default matte material with dark and light themes.
+Star Flow now has a sidebar quick entry, read-only mode, Scroll search, project save destinations, and inline previews for images from web sources. The desktop UI uses bundled Inter and Source Han Sans fonts.
 
-[Release notes](docs/releases/v0.3.6.md)
+[Release notes](docs/releases/v0.3.7.md)
 
 ## What STArra is for
 
@@ -42,10 +42,10 @@ Requires **Windows 10 or 11, x64**. Choose your interface language in Settings.
 
 | Download | Purpose |
 | --- | --- |
-| [starra-0.3.6-setup.exe](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.6/starra-0.3.6-setup.exe) | Standard installer for regular use |
-| [starra-0.3.6-portable.exe](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.6/starra-0.3.6-portable.exe) | Launch without installing. Application data still resides in the current Windows user profile; it does not automatically travel with the executable |
-| [STArra-v0.3.6-docs.zip](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.6/STArra-v0.3.6-docs.zip) | Guides, workflows, examples, and third-party notices |
-| [SHA256SUMS.txt](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.6/SHA256SUMS.txt) | SHA-256 checksums for the release files |
+| [starra-0.3.7-setup.exe](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.7/starra-0.3.7-setup.exe) | Standard installer for regular use |
+| [starra-0.3.7-portable.exe](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.7/starra-0.3.7-portable.exe) | Launch without installing. Application data still resides in the current Windows user profile; it does not automatically travel with the executable |
+| [STArra-v0.3.7-docs.zip](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.7/STArra-v0.3.7-docs.zip) | Guides, workflows, examples, and third-party notices |
+| [SHA256SUMS.txt](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.7/SHA256SUMS.txt) | SHA-256 checksums for the release files |
 
 1. Run the installer from Downloads or your desktop. **Do not run it from inside the existing installation directory.** Create a Capsule backup before upgrading.
 2. Left-click the ball to open the toolbar. Create a project in the project workspace and select its directory.
@@ -68,7 +68,7 @@ The Chinese names below help identify the corresponding modules in screenshots a
 | **Codex · Shortcuts (秘籍)** | Offline shortcut references for SketchUp, Rhino, and AutoCAD |
 | **Capsule · Backup (胶囊)** | Package application records and original files, select project/date scopes, verify integrity, restore on another computer, and rebuild included paths |
 
-The right-click mini toolbar includes **Star Notes (星笺)**, a task-based timeline synchronized with linked checklists and extracted tasks in Star Sand. **星轨 and 星镜 remain planned tools.** Middle-click opens the **STArra assistant (星灵)**.
+The right-click mini toolbar includes **Star Notes (星笺)**, a task-based timeline synchronized with linked checklists and extracted tasks in Star Sand. **星轨 and 星镜 remain planned tools.** Middle-click opens the **Star Flow assistant (星流)**.
 
 ## Desktop interaction and appearance
 
@@ -155,7 +155,7 @@ v0.3.4 passed both TypeScript checks, 238 regression tests, and isolated-data in
 
 - [Documentation index — Chinese](docs/README.md)
 - [Project file board — Chinese](docs/织梦台文件看板.md) · [Appearance — Chinese](docs/外观配色与质感.md)
-- [Release notes — Chinese](docs/releases/v0.3.6.md) · [Changelog — Chinese](CHANGELOG.md)
+- [Release notes — Chinese](docs/releases/v0.3.7.md) · [Changelog — Chinese](CHANGELOG.md)
 - [Product story — Chinese](docs/STARRA-闪星品牌故事.md)
 
 For a bug report, open a [GitHub issue](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/issues) with the application version, Windows version, reproduction steps, and a screenshot. For preview problems, include the file extension and relevant thumbnail-provider information. Do not attach credentials or private project originals.

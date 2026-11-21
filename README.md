@@ -6,16 +6,16 @@
 
 **简体中文 · [English](README.en.md)**
 
-**[v0.3.6](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/tag/v0.3.6)** · ![Platform](https://img.shields.io/badge/platform-Windows_10%20%2F%2011_x64-626b78)
+**[v0.3.7](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/tag/v0.3.7)** · ![Platform](https://img.shields.io/badge/platform-Windows_10%20%2F%2011_x64-626b78)
 ![Interface languages](https://img.shields.io/badge/UI-中文%20%7C%20English%20%7C%20日本語-687e70)
 
 [下载最新版](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/latest) · [使用指南](docs/使用指南.md) · [文档目录](docs/README.md) · [更新记录](CHANGELOG.md) · [问题反馈](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/issues)
 
-## v0.3.6 新功能
+## v0.3.7 新功能
 
-拖动小球贴近屏幕左右边缘可切换为竖向侧栏，离开 3 秒后自动收边，悬停提示条恢复。折叠与展开共用带项目封面的工作空间入口。功能页面采用分区悬浮卡片，宽窗口并排展示列表和详情。星钉支持贴边收纳，外观统一使用默认哑光材质和深浅主题。
+星流新增侧栏快捷入口、只读模式、卷轴检索和项目保存位置。联网参考图按来源插入正文。界面统一字号层级，并内置 Inter 和思源黑体。
 
-[使用指南](docs/使用指南.md) · [v0.3.6 发布说明](docs/releases/v0.3.6.md)
+[使用指南](docs/使用指南.md) · [v0.3.7 发布说明](docs/releases/v0.3.7.md)
 
 ## 产品定位
 
@@ -24,7 +24,7 @@
 - **围绕项目组织工作。** 把目录文件、版本组、参考关系、提示词与素材放回对应项目，区分正在浏览的项目和当前收集目标。
 - **保留可以核对的历史。** 主动保存真实文件快照，用关系图和时间视图理解文件来源、变化与用途。
 - **让 AI 参与具体操作。** 可选模型助手与本地 MCP 接入，查询应用资料、整理任务、生成文件，并让修改操作经过确认。
-- **保持轻量的桌面入口。** 左键展开功能栏、右键打开 mini 栏、中键呼出星灵；无需账号即可使用本地功能。
+- **保持轻量的桌面入口。** 左键展开功能栏、右键打开 mini 栏、中键呼出星流；无需账号即可使用本地功能。
 
 适合需要管理模型、图纸、图像、文档和参考资料的建筑、室内、景观及其他设计工作者。STArra 不替代专业设计软件，也不把人工确认的文件关系当成自动解析的专业依赖。
 
@@ -34,10 +34,10 @@
 
 | 下载文件 | 用途 |
 | --- | --- |
-| [starra-0.3.6-setup.exe](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.6/starra-0.3.6-setup.exe) | 常规安装，适合长期使用 |
-| [starra-0.3.6-portable.exe](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.6/starra-0.3.6-portable.exe) | 免安装启动；应用数据仍保存在当前 Windows 用户目录，不会自动随 exe 携带 |
-| [STArra-v0.3.6-docs.zip](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.6/STArra-v0.3.6-docs.zip) | 使用说明、工作流、示例和第三方许可 |
-| [SHA256SUMS.txt](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.6/SHA256SUMS.txt) | 下载文件的 SHA-256 校验值 |
+| [starra-0.3.7-setup.exe](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.7/starra-0.3.7-setup.exe) | 常规安装，适合长期使用 |
+| [starra-0.3.7-portable.exe](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.7/starra-0.3.7-portable.exe) | 免安装启动；应用数据仍保存在当前 Windows 用户目录，不会自动随 exe 携带 |
+| [STArra-v0.3.7-docs.zip](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.7/STArra-v0.3.7-docs.zip) | 使用说明、工作流、示例和第三方许可 |
+| [SHA256SUMS.txt](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/download/v0.3.7/SHA256SUMS.txt) | 下载文件的 SHA-256 校验值 |
 
 1. 从下载目录或桌面运行安装包，**不要把安装包放在旧安装目录内运行**。升级前建议先创建胶囊备份。
 2. 左键点击小球，打开功能栏；进入「织梦台」创建项目并选择项目文件夹。
@@ -58,7 +58,7 @@
 | **秘籍 · 快捷键参考** | SketchUp、Rhino、AutoCAD 离线快捷键查询 |
 | **胶囊 · 备份与迁移** | 应用记录与原文件统一打包，项目/日期范围、完整性校验、换机恢复和路径重建 |
 
-右键小球可打开 mini 功能栏：**星笺**提供任务节点时间线，支持与星砂关联待办、AI星流同步；**星轨、星镜**仍为规划入口。中键点击小球可打开 **STArra 星灵** 对话。
+右键小球可打开 mini 功能栏：**星笺**提供任务节点时间线，支持与星砂关联待办、AI星流同步；**星轨、星镜**仍为规划入口。中键点击小球可打开 **STArra 星流** 对话。
 
 ## 桌面交互与外观
 
@@ -102,9 +102,9 @@ MCP 状态可使用双星轨道或流光光环，光圈大小与粗细可调；�
 
 ## 可选 AI 与外部 Agent
 
-### 星灵：让模型调用工具完成工作
+### 星流：让模型调用工具完成工作
 
-中键呼出星灵，使用你配置的模型查询资料、管理待办、读取应用内容或生成 Word、Excel、PDF、Markdown 等真实文件。工具的实际执行结果会回传给模型，生成文件提供打开与另存入口。
+中键呼出星流，使用你配置的模型查询资料、管理待办、读取应用内容或生成 Word、Excel、PDF、Markdown 等真实文件。工具的实际执行结果会回传给模型，生成文件提供打开与另存入口。
 
 模型接口需兼容 Chat Completions 的 Function Calling；联网搜索需另行配置 Tavily。模型网页产品具备某项能力，不代表其 API 自动提供相同工具。
 
@@ -117,7 +117,7 @@ MCP 状态可使用双星轨道或流光光环，光圈大小与粗细可调；�
 - Agent 可登记生成文件的真实路径并关联项目，也可保存卷轴的图片、提示词与参数，方便回到应用核对成果。
 - 小球光环与跟随气泡显示连接、执行、确认及结果；外观设置中可选择光环样式、大小和粗细。
 
-[星灵使用说明](docs/使用文档/15-小球助手.md) · [MCP 配置、权限与操作目录](docs/使用文档/16-外部Agent.md)
+[星流使用说明](docs/使用文档/15-小球助手.md) · [MCP 配置、权限与操作目录](docs/使用文档/16-外部Agent.md)
 
 ## 数据、隐私与备份边界
 
@@ -151,7 +151,7 @@ v0.3.4 已通过两套类型检查、238 项回归测试，以及隔离数据目
 
 - [使用指南与全部文档](docs/README.md)
 - [项目文件看板](docs/织梦台文件看板.md) · [外观设置](docs/外观配色与质感.md)
-- [版本发布说明](docs/releases/v0.3.6.md) · [更新记录](CHANGELOG.md)
+- [版本发布说明](docs/releases/v0.3.7.md) · [更新记录](CHANGELOG.md)
 - [品牌故事](docs/STARRA-闪星品牌故事.md)
 
 遇到问题可在 [GitHub Issues](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/issues) 提供版本号、Windows 版本、复现步骤和截图；涉及素材格式时注明扩展名及相关预览条件，请勿附带密钥或私人项目原件。

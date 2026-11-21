@@ -5,6 +5,8 @@ STArra 原创代码见根目录 MIT LICENSE。依赖和改编内容保留各自�
 | 内容 | 来源 | 随附说明 |
 | --- | --- | --- |
 | STArra 品牌字标字体 Bodoni Moda | Bodoni Moda 字体项目 | [SIL Open Font License 1.1](licenses/BodoniModa-OFL.txt)，随应用内置字体，保留原字体授权 |
+| 界面字体 Inter | [Inter 字体项目](https://github.com/rsms/inter) | [SIL Open Font License 1.1](licenses/Inter-OFL.txt) |
+| 界面字体思源黑体简体中文 | [Adobe Source Han Sans](https://github.com/adobe-fonts/source-han-sans) | [SIL Open Font License 1.1](licenses/SourceHanSans-OFL.txt) |
 | 吉祥物轮廓与表情数据 | LaoA-GrokBot / zhulin025 | [MIT](licenses/LaoA-GrokBot-MIT.txt) |
 | 星岛机器人眼睛 | [CX-ArtLab/agent-robot-avatar](https://github.com/CX-ArtLab/agent-robot-avatar) / CX ART Lab | [MIT](licenses/Agent-Robot-Avatar-MIT.txt)，固定提交 `894ae731742af09d5479139d75b0b323eb130bae`；适配原眼形、眼皮、眨眼、闲置张望、waiting-wave、笑眼、失败垂眼及 wary，复用 STArra 的两只眼睛路径；未采用上游头部、天线和皮肤，不主张其角色视觉身份 |
 | 部分设计格式预览解析 | cinderblock/cad-preview | [MIT](licenses/cad-preview-MIT.txt)，已增加读取、解压和像素边界 |
@@ -16,6 +18,8 @@ STArra 原创代码见根目录 MIT LICENSE。依赖和改编内容保留各自�
 | Obsidian Markdown Skill | kepano/obsidian-skills / Steph Ango | [MIT](licenses/obsidian-markdown-LICENSE.txt)，固定提交 `3ccff5338ea700537839b21900aa5358a0402c98` 的 obsidian-markdown SKILL.md 与三个参考文档；用于便签 AI 整理的文本指令，STArra 另加通用 Markdown、事实与待办状态保留要求 |
 | Meeting Notes Skill | coco-research/coco / Coco Inc. | [MIT](licenses/coco-meeting-notes-LICENSE.txt)，固定提交 `2e838244a0c6a2309e51752fa151b6e335f99b78` 的 skills/meeting-notes/SKILL.md；现为便签默认智能整理指令，应用适配限制为当前便签内容并注入本机时间 |
 | Orb 流光光环 | DavidHDev/react-bits / David Haz | [MIT + Commons Clause](licenses/react-bits-Orb-LICENSE.txt)，集成用户提供的原版 WebGL 组件，增加外侧布局、粗细调节、调用波峰与缩放亮度动画 |
+| 星灵欢迎区 WebGL2 Orb | [SmoothUI Orb](https://smoothui.dev/docs/components/orb) / Eduardo Calvo | [MIT](licenses/SmoothUI-MIT.txt)，来自官方组件注册表，沿用着色器和默认配色 |
+| 星灵执行步骤折叠 | [SmoothUI AI Reasoning](https://smoothui.dev/docs/components/ai-reasoning) | [SmoothUI MIT](licenses/SmoothUI-MIT.txt)、[Motion MIT](licenses/Motion-MIT.txt)，来自官方组件注册表，适配主题和工具状态 |
 | GlassSurface 表面材质 | DavidHDev/react-bits / David Haz | [MIT + Commons Clause](licenses/react-bits-JellyRadio-LICENSE.txt)，直接集成用户提供的官方 JavaScript + CSS 完整源码；原文、哈希和许可位于组件目录。独立的 Windows 背景模糊为 STArra 实现，原分层桌面透镜已退出材质路径 |
 | Electron、React、Vite、TypeScript、mammoth、pdfjs-dist 等 | 各上游项目 | 各依赖包自身许可；Electron 随运行时提供相应许可文件 |
 | Word 文件生成 docx | dolanmiu/docx | [MIT](licenses/docx-MIT.txt)，用于星灵生成标准 DOCX 文件 |
