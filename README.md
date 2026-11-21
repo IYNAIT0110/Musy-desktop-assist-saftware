@@ -6,7 +6,7 @@
 
 **简体中文 · [English](README.en.md)**
 
-**[v0.3.7](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/tag/v0.3.7)** · ![Platform](https://img.shields.io/badge/platform-Windows_10%20%2F%2011_x64-626b78)
+[![Release v0.3.7](https://img.shields.io/badge/release-v0.3.7-626b78?style=flat)](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/tag/v0.3.7) ![Platform](https://img.shields.io/badge/platform-Windows_10%20%2F%2011_x64-626b78)
 ![Interface languages](https://img.shields.io/badge/UI-中文%20%7C%20English%20%7C%20日本語-687e70)
 
 [下载最新版](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/releases/latest) · [使用指南](docs/使用指南.md) · [文档目录](docs/README.md) · [更新记录](CHANGELOG.md) · [问题反馈](https://github.com/IYNAIT0110/Musy-desktop-assist-saftware/issues)
